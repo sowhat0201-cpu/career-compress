@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>價值觀拍賣會 × 我的生涯決策羅盤</title>
   <!-- Tailwind CSS -->
-  <script src="https://script.google.com/a/macros/kpvs.tp.edu.tw/s/AKfycbwxmjHLCTOSn1EtQy520SbDoVtkDHaB019CaU9L-TarIXtJIRxlkYOFqbEiq0HUcZZ6/exec"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Noto Sans TC & Noto Serif TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,1180 +22,864 @@
             serif: ['"Noto Serif TC"', 'serif'],
           },
           colors: {
-            cream: '#FAF7F2',
-            paper: '#FFFFFF',
+            paper: '#FAF8F5',
+            card: '#FFFFFF',
             ink: '#2D2A26',
             muted: '#6E685F',
-            terracotta: '#D96B43',
-            terracottaLight: '#FBECE6',
-            sage: '#4A7C59',
-            sageLight: '#E8F2EC',
-            ochre: '#D49A35',
-            ochreLight: '#FDF5E6',
-            slateBlue: '#4B6B88',
-            slateBlueLight: '#EBF1F6',
-            plum: '#7D5A78',
-            plumLight: '#F4EEF3',
+            accent: '#D97757',
+            accentLight: '#FBECE6',
+            sage: '#5B7A66',
+            sageLight: '#EBF1ED',
+            amberSoft: '#F5EFE6',
+            borderWarm: '#E6DFD5'
           }
         }
       }
     }
   </script>
-
   <style>
     body {
-      background-color: #FAF7F2;
+      background-color: #FAF8F5;
       color: #2D2A26;
       -webkit-tap-highlight-color: transparent;
-      overflow-x: hidden;
     }
-
-    /* 卡片平滑過渡動畫 */
-    .value-card {
-      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    .paper-texture {
+      background-image: radial-gradient(#E6DFD5 0.75px, transparent 0.75px);
+      background-size: 16px 16px;
     }
-    .value-card:active {
-      transform: scale(0.97);
+    .card-transition {
+      transition: all 0.22s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
-
-    /* 漸進顯示動畫 */
-    @keyframes fadeSlideUp {
-      from {
-        opacity: 0;
-        transform: translateY(14px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .card-selected {
+      border-color: #D97757;
+      background-color: #FBECE6;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px -4px rgba(217, 119, 87, 0.25);
     }
-    .step-animate {
-      animation: fadeSlideUp 0.4s ease-out forwards;
-    }
-
-    /* 自訂滑桿樣式 */
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
-      height: 10px;
-      border-radius: 999px;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
       background: #E6DFD5;
-      outline: none;
+      height: 0.5rem;
+      border-radius: 999px;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 26px;
-      height: 26px;
+      margin-top: -6px;
+      background-color: #D97757;
+      height: 1.25rem;
+      width: 1.25rem;
       border-radius: 50%;
-      background: #D96B43;
-      border: 3px solid #FFFFFF;
+      border: 2px solid #FFFFFF;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      cursor: pointer;
     }
-
-    /* 手帳點點底紋 */
-    .dot-grid {
-      background-image: radial-gradient(#DCD5C9 1px, transparent 1px);
-      background-size: 16px 16px;
+    .step-section {
+      display: none;
+      animation: fadeIn 0.35s ease-out;
+    }
+    .step-section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans selection:bg-terracottaLight selection:text-terracotta">
+<body class="paper-texture min-h-screen flex flex-col justify-between">
 
-  <!-- 頂部導覽列與進度條 -->
-  <header class="sticky top-0 z-40 bg-cream/95 backdrop-blur-md border-b border-stone-200/80 px-4 py-3">
-    <div class="max-w-2xl mx-auto flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2">
-        <span class="text-xl">🧭</span>
-        <div>
-          <h1 class="text-sm sm:text-base font-bold tracking-tight text-ink leading-tight">生涯決策羅盤</h1>
-          <p id="step-subtitle" class="text-[11px] text-muted">Step 0 / 5 · 暖身與情緒溫度計</p>
+  <!-- Top Navigation & Progress Bar -->
+  <header class="sticky top-0 z-30 bg-[#FAF8F5]/95 backdrop-blur-sm border-b border-borderWarm px-4 py-3">
+    <div class="max-w-2xl mx-auto">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🧭</span>
+          <h1 class="font-serif font-bold text-base sm:text-lg text-ink tracking-wide">我的生涯決策羅盤</h1>
         </div>
+        <span id="stepIndicator" class="text-xs font-medium px-2.5 py-1 rounded-full bg-amberSoft text-muted border border-borderWarm">
+          階段 1 / 5
+        </span>
       </div>
-    </div>
-
-    <!-- 進度條 -->
-    <div class="max-w-2xl mx-auto mt-2.5 bg-stone-200 h-1.5 rounded-full overflow-hidden">
-      <div id="progress-bar" class="bg-terracotta h-full transition-all duration-500 rounded-full" style="width: 10%;"></div>
+      <!-- Progress Track -->
+      <div class="w-full bg-borderWarm/60 h-1.5 rounded-full overflow-hidden">
+        <div id="progressBar" class="bg-accent h-full transition-all duration-300" style="width: 20%;"></div>
+      </div>
     </div>
   </header>
 
-  <!-- 全域輕提示 (Toast) -->
-  <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform translate-y-2">
-    <div id="toast-msg" class="bg-ink text-white text-sm px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 whitespace-nowrap">
-      提醒訊息
-    </div>
-  </div>
+  <!-- Main Content Container -->
+  <main class="flex-grow max-w-2xl w-full mx-auto px-4 py-6">
 
-  <!-- 主內容區塊 -->
-  <main class="flex-1 max-w-2xl w-full mx-auto px-4 pt-5 pb-28">
-
-    <!-- ==================== STEP 0: 暖身與情緒溫度計 ==================== -->
-    <section id="step-0" class="step-animate space-y-5">
-      <div class="bg-paper rounded-3xl p-6 shadow-sm border border-stone-200/70">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-terracottaLight text-terracotta text-xs font-bold mb-3">
-          <span>SEL 社會情緒學習</span> · <span>探索起點</span>
+    <!-- ==================== STEP 1: 破冰與自我定位 ==================== -->
+    <section id="step1" class="step-section active">
+      <div class="bg-card rounded-2xl p-6 sm:p-8 shadow-sm border border-borderWarm">
+        <div class="inline-block px-3 py-1 rounded-full bg-sageLight text-sage text-xs font-bold mb-3">
+          SEL 社會情緒學習｜生涯決定與價值觀
         </div>
-        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-ink leading-snug mb-2">
-          在不確定中，<br>尋找屬於你的羅盤
+        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-ink leading-snug mb-3">
+          在不確定中，<br>校準屬於你的內在羅盤
         </h2>
-        <p class="text-sm text-muted leading-relaxed">
-          面對升學、實習或未來出路感到迷惘，並不是因為你不夠好，而是因為你對自己的人生很在乎。這份數位學習單不評分，請誠實傾聽內心的聲音。
+        <p class="text-muted text-sm sm:text-base leading-relaxed mb-6">
+          面對升學、實習或步入職場的選擇感到焦慮，代表你對自己的人生很在乎。選擇沒有絕對的「標準答案」，只有「適不適合現在的你」。請誠實傾聽內心的聲音，完成這趟 5 步驟的探索。
+        </p>
+
+        <!-- Student Basic Info -->
+        <div class="bg-amberSoft/70 rounded-xl p-4 sm:p-5 border border-borderWarm mb-6 space-y-4">
+          <h3 class="font-bold text-sm text-ink flex items-center gap-1.5">
+            <span>✍️</span> 建立你的探索檔案（僅顯示於個人結果卡與老師統計表）
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-muted mb-1">班級與座號</label>
+              <input type="text" id="inputClassSeat" placeholder="例如：餐三忠 12號"
+                class="w-full px-3.5 py-2.5 rounded-lg bg-white border border-borderWarm text-sm focus:outline-none focus:border-accent" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-muted mb-1">你的姓名或暱稱</label>
+              <input type="text" id="inputName" placeholder="請輸入姓名"
+                class="w-full px-3.5 py-2.5 rounded-lg bg-white border border-borderWarm text-sm focus:outline-none focus:border-accent" />
+            </div>
+          </div>
+
+          <!-- Anxiety Thermometer -->
+          <div class="pt-2">
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-xs font-medium text-muted">此刻想到「未來選擇」，你的焦慮溫度是？</label>
+              <span id="anxietyLabel" class="text-xs font-bold text-accent bg-accentLight px-2 py-0.5 rounded">3 分（有點迷惘）</span>
+            </div>
+            <input type="range" id="anxietySlider" min="1" max="5" value="3" class="w-full" oninput="updateAnxietyText(this.value)" />
+            <div class="flex justify-between text-[11px] text-muted mt-1">
+              <span>1 非常平靜</span>
+              <span>3 有些猶豫</span>
+              <span>5 非常焦慮</span>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="goToStep(2)" class="w-full py-3.5 rounded-xl bg-accent text-white font-bold text-base shadow-sm hover:bg-accent/90 active:scale-[0.99] transition">
+          進入第一關：《價值觀拍賣會》 →
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== STEP 2: 價值觀拍賣會（三輪淘汰賽） ==================== -->
+    <section id="step2" class="step-section">
+      <div class="mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <span id="roundBadge" class="px-3 py-1 rounded-full bg-accent text-white text-xs font-bold">
+            第一輪海選：16 選 8
+          </span>
+          <span id="selectionCounter" class="text-sm font-bold text-ink bg-white px-3 py-1 rounded-full border border-borderWarm">
+            已選：<span id="selectedCount" class="text-accent">0</span> / <span id="targetCount">8</span> 項
+          </span>
+        </div>
+        <h2 id="roundTitle" class="font-serif text-xl sm:text-2xl font-bold text-ink">
+          請從 16 張價值觀中，圈出「我有興趣的 8 個」
+        </h2>
+        <p id="roundDesc" class="text-xs sm:text-sm text-muted mt-1">
+          沒有好壞之分，憑直覺點擊你覺得「人生中很重要」的卡片。
         </p>
       </div>
 
-      <!-- 基本資料 -->
-      <div class="bg-paper rounded-3xl p-5 sm:p-6 shadow-sm border border-stone-200/70 space-y-4">
-        <h3 class="font-bold text-base flex items-center gap-2 text-ink">
-          <span class="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center text-xs">1</span>
-          <span>建立你的探索檔案</span>
-        </h3>
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-muted mb-1">班級</label>
-            <input type="text" id="input-class" placeholder="例：返一/返二"
-              class="w-full px-3 py-2.5 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-terracotta transition" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-muted mb-1">學號</label>
-            <input type="text" id="input-seat" placeholder="例：11318000全碼"
-              class="w-full px-3 py-2.5 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-terracotta transition" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-muted mb-1">姓名 </label>
-            <input type="text" id="input-name" placeholder="請輸入你的名字"
-              class="w-full px-3 py-2.5 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-terracotta transition" />
-          </div>
-        </div>
+      <!-- Cards Grid -->
+      <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        <!-- Cards injected by JS -->
       </div>
 
-      <!-- 情緒溫度計 -->
-      <div class="bg-paper rounded-3xl p-5 sm:p-6 shadow-sm border border-stone-200/70 space-y-4">
-        <h3 class="font-bold text-base flex items-center gap-2 text-ink">
-          <span class="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center text-xs">2</span>
-          <span>情緒溫度計：現在想到「未來選擇」，你的焦慮程度是？</span>
-        </h3>
-
-        <div class="grid grid-cols-5 gap-2 pt-1" id="anxiety-buttons">
-          <button type="button" onclick="setAnxiety(1)" data-score="1"
-            class="anxiety-btn flex flex-col items-center p-3 rounded-2xl border-2 border-stone-200 bg-cream/60 hover:border-terracotta/50 transition">
-            <span class="text-2xl mb-1">😌</span>
-            <span class="text-xs font-bold">1 分</span>
-            <span class="text-[10px] text-muted">很平靜</span>
-          </button>
-          <button type="button" onclick="setAnxiety(2)" data-score="2"
-            class="anxiety-btn flex flex-col items-center p-3 rounded-2xl border-2 border-stone-200 bg-cream/60 hover:border-terracotta/50 transition">
-            <span class="text-2xl mb-1">🙂</span>
-            <span class="text-xs font-bold">2 分</span>
-            <span class="text-[10px] text-muted">微緊張</span>
-          </button>
-          <button type="button" onclick="setAnxiety(3)" data-score="3"
-            class="anxiety-btn flex flex-col items-center p-3 rounded-2xl border-2 border-terracotta bg-terracottaLight transition">
-            <span class="text-2xl mb-1">🤔</span>
-            <span class="text-xs font-bold text-terracotta">3 分</span>
-            <span class="text-[10px] text-terracotta">有點迷惘</span>
-          </button>
-          <button type="button" onclick="setAnxiety(4)" data-score="4"
-            class="anxiety-btn flex flex-col items-center p-3 rounded-2xl border-2 border-stone-200 bg-cream/60 hover:border-terracotta/50 transition">
-            <span class="text-2xl mb-1">😰</span>
-            <span class="text-xs font-bold">4 分</span>
-            <span class="text-[10px] text-muted">很焦慮</span>
-          </button>
-          <button type="button" onclick="setAnxiety(5)" data-score="5"
-            class="anxiety-btn flex flex-col items-center p-3 rounded-2xl border-2 border-stone-200 bg-cream/60 hover:border-terracotta/50 transition">
-            <span class="text-2xl mb-1">🤯</span>
-            <span class="text-xs font-bold">5 分</span>
-            <span class="text-[10px] text-muted">快爆炸</span>
-          </button>
-        </div>
-
-        <!-- 動態同理回饋框 -->
-        <div id="anxiety-feedback" class="p-4 rounded-2xl bg-ochreLight border border-ochre/30 text-sm text-ink leading-relaxed">
-          💡 <strong>大腦正在保護你：</strong> 3 分的迷惘非常正常！就像走進有 500 道菜的自助餐，選擇變多反而讓人猶豫。接下來我們用遊戲幫你篩選出真正重要的菜色。
-        </div>
+      <!-- Navigation Controls -->
+      <div class="flex gap-3">
+        <button onclick="handleRoundBack()" class="px-4 py-3 rounded-xl bg-white border border-borderWarm text-muted font-medium text-sm hover:bg-amberSoft transition">
+          ← 返回上一步
+        </button>
+        <button id="nextRoundBtn" onclick="handleRoundNext()" disabled
+          class="flex-grow py-3 rounded-xl bg-accent text-white font-bold text-sm sm:text-base shadow-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent/90 transition">
+          還差 8 項即可進入下一輪
+        </button>
       </div>
-
-      <button type="button" onclick="goToStep(1)"
-        class="w-full py-4 rounded-2xl bg-terracotta hover:bg-terracotta/90 text-white font-bold text-base shadow-md shadow-terracotta/20 transition flex items-center justify-center gap-2">
-        <span>進入第一關：《價值觀拍賣會》</span>
-        <span>→</span>
-      </button>
     </section>
 
-    <!-- ==================== STEP 1: 《價值觀拍賣會》三階段淘汰 ==================== -->
-    <section id="step-1" class="hidden step-animate space-y-4">
-      <!-- 關卡說明橫幅 -->
-      <div class="bg-paper rounded-3xl p-5 shadow-sm border border-stone-200/70">
-        <div class="flex items-center justify-between gap-2 mb-2">
-          <span id="auction-badge" class="px-3 py-1 rounded-full bg-terracottaLight text-terracotta text-xs font-bold">
-            第一輪：海選階段 (16 選 8)
-          </span>
-          <span id="auction-counter" class="text-sm font-bold text-ink bg-cream px-3 py-1 rounded-full border border-stone-200">
-            已選 <span class="text-terracotta text-base">0</span> / 8 張
-          </span>
-        </div>
-        <h2 id="auction-title" class="font-serif text-xl font-bold text-ink mb-1">
-          選出你有感覺的 8 個價值觀
+    <!-- ==================== STEP 3: 羅盤中心定義與內心檢測 ==================== -->
+    <section id="step3" class="step-section">
+      <div class="bg-card rounded-2xl p-5 sm:p-7 shadow-sm border border-borderWarm mb-5">
+        <span class="inline-block px-3 py-1 rounded-full bg-accentLight text-accent text-xs font-bold mb-2">
+          階段 3 / 5｜校準羅盤中心
+        </span>
+        <h2 class="font-serif text-xl sm:text-2xl font-bold text-ink mb-2">
+          定義你的三大核心底線
         </h2>
-        <p id="auction-desc" class="text-xs sm:text-sm text-muted leading-relaxed">
-          這 16 張牌沒有好壞之分。請直覺點擊：<strong>「如果沒有這個東西，我的人生會覺得很空虛」</strong>的 8 張牌。
+        <p class="text-xs sm:text-sm text-muted mb-5">
+          這是你歷經殘酷淘汰後留下的 Top 3 價值觀。請用<strong>你自己的話</strong>寫下它對你的意義，並誠實檢測有多少比例是「自己真正想要的」。
         </p>
 
-        <!-- 象限圖例（僅在第一輪顯示） -->
-        <div id="category-legend" class="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-stone-100">
-          <span class="text-[11px] px-2 py-0.5 rounded-md bg-ochreLight text-ochre font-medium">● 物質保障</span>
-          <span class="text-[11px] px-2 py-0.5 rounded-md bg-terracottaLight text-terracotta font-medium">● 自我實現</span>
-          <span class="text-[11px] px-2 py-0.5 rounded-md bg-sageLight text-sage font-medium">● 人際情感</span>
-          <span class="text-[11px] px-2 py-0.5 rounded-md bg-slateBlueLight text-slateBlue font-medium">● 社會影響</span>
-        </div>
-      </div>
-
-      <!-- 卡片網格容器 -->
-      <div id="cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <!-- 由 JS 動態渲染 -->
-      </div>
-
-      <!-- 第三輪專屬：排序提示 -->
-      <div id="stage3-rank-hint" class="hidden bg-sageLight/80 border border-sage/30 rounded-2xl p-3.5 text-xs text-sage font-medium flex items-center gap-2">
-        <span>🏅</span>
-        <span>提示：你點選的順序就是你的 <strong>TOP 1 → TOP 2 → TOP 3</strong>！若想調整順序，取消勾選再重新點擊即可。</span>
-      </div>
-
-      <!-- 底部操作按鈕列 -->
-      <div class="flex gap-3 pt-2">
-        <button type="button" id="btn-auction-back" onclick="handleAuctionBack()"
-          class="px-5 py-3.5 rounded-2xl bg-paper border border-stone-300 text-muted font-bold text-sm hover:bg-stone-100 transition">
-          ← 返回
-        </button>
-        <button type="button" id="btn-auction-next" onclick="handleAuctionNext()"
-          class="flex-1 py-3.5 rounded-2xl bg-stone-300 text-stone-500 font-bold text-sm transition flex items-center justify-center gap-2 cursor-not-allowed">
-          <span>請先選滿 8 張卡片</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- ==================== STEP 2: 《我的羅盤中心》定義與內心誠實度 ==================== -->
-    <section id="step-2" class="hidden step-animate space-y-5">
-      <div class="bg-paper rounded-3xl p-5 sm:p-6 shadow-sm border border-stone-200/70">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sageLight text-sage text-xs font-bold mb-2">
-          <span>羅盤校準</span> · <span>建立內在定義</span>
-        </div>
-        <h2 class="font-serif text-xl sm:text-2xl font-bold text-ink mb-1">
-          你的三大核心價值觀
-        </h2>
-        <p class="text-xs sm:text-sm text-muted">
-          經歷殘酷淘汰後留下的這 3 張牌，就是你做決定的底線。請用<strong>你自己的話</strong>寫下它對你的意義。
-        </p>
-      </div>
-
-      <!-- Top 3 定義輸入卡片 -->
-      <div id="top3-definitions-container" class="space-y-4">
-        <!-- 由 JS 動態生成 -->
-      </div>
-
-      <!-- 內心誠實度檢測滑桿 -->
-      <div class="bg-paper rounded-3xl p-5 sm:p-6 shadow-sm border border-stone-200/70 space-y-4">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">🔍</span>
-          <div>
-            <h3 class="font-bold text-base text-ink">內心誠實度檢測</h3>
-            <p class="text-xs text-muted">這 3 個選擇中，有多少是「我自己想要」，有多少是「爸媽或社會期待」？</p>
-          </div>
+        <!-- Top 3 Definition Inputs -->
+        <div id="top3DefinitionsContainer" class="space-y-4 mb-6">
+          <!-- Injected by JS -->
         </div>
 
-        <div class="pt-2">
-          <div class="flex justify-between text-sm font-bold mb-2">
-            <span class="text-terracotta">我自己想要：<span id="self-pct-label" class="text-lg">70</span>%</span>
-            <span class="text-slateBlue">別人期待：<span id="other-pct-label" class="text-lg">30</span>%</span>
-          </div>
-          <input type="range" id="honesty-slider" min="0" max="100" step="5" value="70"
-            oninput="updateHonestySlider(this.value)" class="w-full" />
-        </div>
-
-        <div id="honesty-feedback" class="p-3.5 rounded-2xl bg-sageLight text-sage text-xs sm:text-sm leading-relaxed">
-          ✨ 很棒的平衡！你很清楚自己內心真正的渴望，同時也兼顧了現實考量。
-        </div>
-      </div>
-
-      <div class="flex gap-3">
-        <button type="button" onclick="goToStep(1)"
-          class="px-5 py-3.5 rounded-2xl bg-paper border border-stone-300 text-muted font-bold text-sm hover:bg-stone-100 transition">
-          ← 重選卡片
-        </button>
-        <button type="button" onclick="goToStep(3)"
-          class="flex-1 py-3.5 rounded-2xl bg-terracotta hover:bg-terracotta/90 text-white font-bold text-sm shadow-md shadow-terracotta/20 transition">
-          下一步：十字路口路線模擬 →
-        </button>
-      </div>
-    </section>
-
-    <!-- ==================== STEP 3: 《十字路口的模擬》A vs B 星級評分 ==================== -->
-    <section id="step-3" class="hidden step-animate space-y-5">
-      <div class="bg-paper rounded-3xl p-5 sm:p-6 shadow-sm border border-stone-200/70 space-y-4">
-        <div>
-          <span class="inline-block px-3 py-1 rounded-full bg-slateBlueLight text-slateBlue text-xs font-bold mb-2">
-            決策天秤 · 具體比較
-          </span>
-          <h2 class="font-serif text-xl sm:text-2xl font-bold text-ink mb-1">
-            把糾結的兩個選項放上天秤
-          </h2>
-          <p class="text-xs sm:text-sm text-muted">
-            寫下你目前最猶豫的兩個方向（可點擊下方快速標籤填入參考）：
-          </p>
-        </div>
-
-        <!-- 快速建議標籤 -->
-        <div class="flex flex-wrap gap-1.5">
-          <button type="button" onclick="applyRoutePreset('繼續升學讀大學', '先投入職場累積經驗')"
-            class="text-xs px-2.5 py-1.5 rounded-full bg-cream hover:bg-stone-200 border border-stone-200 text-ink transition">
-            💡 繼續升學 vs. 直接就業
-          </button>
-          <button type="button" onclick="applyRoutePreset('留在原本熟悉的科系領域', '勇敢跨界嘗試新領域')"
-            class="text-xs px-2.5 py-1.5 rounded-full bg-cream hover:bg-stone-200 border border-stone-200 text-ink transition">
-            💡 留在原領域 vs. 跨界嘗試
-          </button>
-          <button type="button" onclick="applyRoutePreset('維持現狀安穩前進', '做出一個大膽改變')"
-            class="text-xs px-2.5 py-1.5 rounded-full bg-cream hover:bg-stone-200 border border-stone-200 text-ink transition">
-            💡 維持現狀 vs. 做出改變
-          </button>
-        </div>
-
-        <!-- 選項 A 與 B 名稱輸入 -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          <div class="p-3.5 rounded-2xl bg-terracottaLight/50 border border-terracotta/30">
-            <label class="block text-xs font-bold text-terracotta mb-1">路線 A（選項一）</label>
-            <input type="text" id="option-a-name" oninput="syncOptionNames()" placeholder="例：繼續升學讀大學"
-              class="w-full px-3 py-2 rounded-xl bg-white border border-stone-200 text-sm font-medium focus:outline-none focus:border-terracotta" />
-          </div>
-          <div class="p-3.5 rounded-2xl bg-slateBlueLight/60 border border-slateBlue/30">
-            <label class="block text-xs font-bold text-slateBlue mb-1">路線 B（選項二）</label>
-            <input type="text" id="option-b-name" oninput="syncOptionNames()" placeholder="例：先去業界實習工作"
-              class="w-full px-3 py-2 rounded-xl bg-white border border-stone-200 text-sm font-medium focus:outline-none focus:border-slateBlue" />
-          </div>
-        </div>
-      </div>
-
-      <!-- 星級契合度評分表 -->
-      <div class="bg-paper rounded-3xl p-5 sm:p-6 shadow-sm border border-stone-200/70 space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="font-bold text-base text-ink">⭐ 價值觀契合度打分 (1~5星)</h3>
-          <div class="flex items-center gap-2 text-xs font-bold">
-            <span class="px-2.5 py-1 rounded-lg bg-terracottaLight text-terracotta">A: <span id="score-a-total">0</span>★</span>
-            <span class="px-2.5 py-1 rounded-lg bg-slateBlueLight text-slateBlue">B: <span id="score-b-total">0</span>★</span>
-          </div>
-        </div>
-
-        <div id="star-rating-rows" class="space-y-4">
-          <!-- 由 JS 動態生成 Top 3 評分列 -->
-        </div>
-      </div>
-
-      <!-- 直覺吸引力與最壞情況 -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- 路線 A 細節 -->
-        <div class="bg-paper rounded-3xl p-5 shadow-sm border border-terracotta/30 space-y-3">
-          <h4 class="font-bold text-sm text-terracotta flex items-center gap-1.5">
-            <span>🅰️</span> <span class="label-opt-a">路線 A</span>
-          </h4>
-          <div>
-            <label class="block text-xs font-medium text-muted mb-1">✨ 這條路最吸引我的地方</label>
-            <textarea id="opt-a-pros" rows="2" placeholder="寫下讓你心動的理由..."
-              class="w-full px-3 py-2 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-terracotta"></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-muted mb-1">⛈️ 我最害怕發生的「最壞情況」</label>
-            <textarea id="opt-a-fear" rows="2" placeholder="你最擔心發生什麼事？"
-              class="w-full px-3 py-2 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-terracotta"></textarea>
-          </div>
-        </div>
-
-        <!-- 路線 B 細節 -->
-        <div class="bg-paper rounded-3xl p-5 shadow-sm border border-slateBlue/30 space-y-3">
-          <h4 class="font-bold text-sm text-slateBlue flex items-center gap-1.5">
-            <span>🅱️</span> <span class="label-opt-b">路線 B</span>
-          </h4>
-          <div>
-            <label class="block text-xs font-medium text-muted mb-1">✨ 這條路最吸引我的地方</label>
-            <textarea id="opt-b-pros" rows="2" placeholder="寫下讓你心動的理由..."
-              class="w-full px-3 py-2 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-slateBlue"></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-muted mb-1">⛈️ 我最害怕發生的「最壞情況」</label>
-            <textarea id="opt-b-fear" rows="2" placeholder="你最擔心發生什麼事？"
-              class="w-full px-3 py-2 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-slateBlue"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex gap-3">
-        <button type="button" onclick="goToStep(2)"
-          class="px-5 py-3.5 rounded-2xl bg-paper border border-stone-300 text-muted font-bold text-sm hover:bg-stone-100 transition">
-          ← 上一步
-        </button>
-        <button type="button" onclick="goToStep(4)"
-          class="flex-1 py-3.5 rounded-2xl bg-terracotta hover:bg-terracotta/90 text-white font-bold text-sm shadow-md shadow-terracotta/20 transition">
-          下一步：恐懼拆解與微行動 →
-        </button>
-      </div>
-    </section>
-
-    <!-- ==================== STEP 4: 《恐懼拆解實驗 & 7 天微行動》 ==================== -->
-    <section id="step-4" class="hidden step-animate space-y-5">
-      <!-- 恐懼拆解實驗 -->
-      <div class="bg-paper rounded-3xl p-5 sm:p-6 shadow-sm border border-stone-200/70 space-y-4">
-        <div>
-          <span class="inline-block px-3 py-1 rounded-full bg-plumLight text-plum text-xs font-bold mb-2">
-            情緒管理練習 · 降低焦慮
-          </span>
-          <h2 class="font-serif text-xl sm:text-2xl font-bold text-ink mb-1">
-            恐懼拆解實驗室
-          </h2>
-          <p class="text-xs sm:text-sm text-muted">
-            大腦常把未知的恐懼無限放大。回想剛剛寫下的「最壞情況」，我們一起來幫它做個壓力測試：
-          </p>
-        </div>
-
-        <!-- 提醒學生剛剛寫的恐懼 -->
-        <div id="fear-recap-box" class="p-3.5 rounded-2xl bg-cream border border-stone-200 text-xs text-muted space-y-1">
-          <p class="font-bold text-ink">📌 你剛剛提到的擔憂：</p>
-          <p id="recap-fear-text">（尚未填寫具體擔憂，可直接思考目前最讓你卡住的害怕）</p>
-        </div>
-
-        <div>
-          <label class="block text-xs sm:text-sm font-bold text-ink mb-1.5">
-            1. 事實 vs. 想像：這份擔憂中，哪些是「已經發生的事實」，哪些是「還沒發生的腦補」？
-          </label>
-          <textarea id="fear-reality" rows="2" placeholder="例：事實是我目前英文成績普通；想像是我一輩子都會找不到好工作..."
-            class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-plum"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-xs sm:text-sm font-bold text-ink mb-1.5">
-            2. 我的 Plan B（補救方案）：如果最壞情況真的發生，我有什麼補救方法或求助對象？
-          </label>
-          <textarea id="fear-planb" rows="2" placeholder="例：如果實習發現不適合，半年後我依然可以報考進修部或轉學考，也可以找輔導老師討論..."
-            class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-plum"></textarea>
-        </div>
-      </div>
-
-      <!-- 7 天微行動承諾 -->
-      <div class="bg-paper rounded-3xl p-5 sm:p-6 shadow-sm border border-sage/40 space-y-4">
-        <div class="flex items-start gap-3">
-          <span class="text-2xl">🌱</span>
-          <div>
-            <h3 class="font-serif text-lg sm:text-xl font-bold text-ink">未來 7 天的微行動承諾 (MVP)</h3>
-            <p class="text-xs sm:text-sm text-muted mt-0.5">
-              你不需要現在就看清整條路，只需要看清下一步踩在哪裡。設定一個 7 天內就能完成的小實驗！
-            </p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-sage mb-1">預計完成日期</label>
-            <input type="date" id="mvp-date"
-              class="w-full px-3 py-2.5 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-sage" />
-          </div>
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-sage mb-1">我願意做的一件「最小行動」是：</label>
-            <input type="text" id="mvp-action" placeholder="例：私訊一位在該科系就讀的學長姐問 3 個問題"
-              class="w-full px-3 py-2.5 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-sage" />
-          </div>
-        </div>
-      </div>
-
-      <div class="flex gap-3">
-        <button type="button" onclick="goToStep(3)"
-          class="px-5 py-3.5 rounded-2xl bg-paper border border-stone-300 text-muted font-bold text-sm hover:bg-stone-100 transition">
-          ← 上一步
-        </button>
-        <button type="button" onclick="generateSummaryCard()"
-          class="flex-1 py-4 rounded-2xl bg-sage hover:bg-sage/90 text-white font-bold text-base shadow-md shadow-sage/20 transition flex items-center justify-center gap-2">
-          <span>🧭 生成我的生涯決策羅盤圖卡</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- ==================== STEP 5: 《專屬生涯決策羅盤總結卡》 ==================== -->
-    <section id="step-5" class="hidden step-animate space-y-5">
-      <!-- 繳交指引提示 -->
-      <div class="bg-ochreLight border border-ochre/40 rounded-2xl p-4 text-xs sm:text-sm text-ink flex items-start gap-2.5">
-        <span class="text-lg">📸</span>
-        <div>
-          <p class="font-bold">小組分享與課堂繳交提醒：</p>
-          <p class="text-muted mt-0.5">在《人生顧問診所》與夥伴分享後，請讓夥伴在下方輸入回饋，接著點擊<strong>「下載圖卡 (PNG)」</strong>或<strong>直接手機截圖</strong>上傳至 Classroom / Padlet！</p>
-        </div>
-      </div>
-
-      <!-- ===== 可匯出為 PNG 的視覺化結果圖卡 ===== -->
-      <div id="export-card" class="bg-cream dot-grid rounded-3xl p-5 sm:p-7 border-2 border-stone-300 shadow-lg space-y-5 relative overflow-hidden">
-        <!-- 頂部裝飾條 -->
-        <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-terracotta via-ochre to-sage"></div>
-
-        <!-- 卡片標頭：學生資訊與情緒變化 -->
-        <div class="flex flex-wrap items-start justify-between gap-2 pt-1 border-b border-stone-300/80 pb-4">
-          <div>
-            <p class="text-[11px] font-bold tracking-widest text-terracotta uppercase">MY CAREER COMPASS · SEL</p>
-            <h2 class="font-serif text-2xl font-bold text-ink mt-0.5">我的生涯決策羅盤</h2>
-            <p id="card-student-info" class="text-xs font-medium text-muted mt-1">
-              返一/返二 · 11318000 · 黃阿薇
-            </p>
-          </div>
-          <div class="bg-white/90 px-3 py-2 rounded-2xl border border-stone-200 text-right">
-            <span class="block text-[10px] text-muted">課前焦慮指數</span>
-            <span id="card-anxiety-badge" class="text-sm font-bold text-terracotta">3 / 5 分 🤔</span>
-          </div>
-        </div>
-
-        <!-- 區塊 1：羅盤核心 Top 3 價值觀 -->
-        <div class="space-y-2.5">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xs font-bold tracking-wider text-muted uppercase">01 / 羅盤中心：三大核心價值觀</h3>
-            <span id="card-honesty-tag" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sageLight text-sage">
-              內在渴望 70%
+        <!-- Inner Desire vs External Expectation Slider -->
+        <div class="bg-sageLight/60 rounded-xl p-4 border border-sage/20">
+          <div class="flex justify-between items-center mb-2">
+            <label class="text-xs sm:text-sm font-bold text-ink">🔍 內心誠實度檢測</label>
+            <span id="innerRatioText" class="text-xs font-bold text-sage bg-white px-2.5 py-1 rounded-full border border-sage/30">
+              自己想要 70% ／ 別人期待 30%
             </span>
           </div>
-          <div id="card-top3-list" class="grid grid-cols-1 gap-2">
-            <!-- JS 動態填入 -->
+          <input type="range" id="innerSlider" min="0" max="100" step="10" value="70" class="w-full" oninput="updateInnerRatio(this.value)" />
+          <div class="flex justify-between text-[11px] text-muted mt-1">
+            <span>0%（全都是爸媽/社會期待）</span>
+            <span>50% 各半</span>
+            <span>100%（完全出於我內心渴望）</span>
+          </div>
+          <p id="innerWarning" class="hidden text-xs text-accent font-medium mt-2 bg-white/80 p-2 rounded-lg">
+            💡 提示：如果「別人期待」超過一半，不妨思考一下，如果沒有人會評價你，你還會做一樣的選擇嗎？
+          </p>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="backToRound3()" class="px-4 py-3 rounded-xl bg-white border border-borderWarm text-muted font-medium text-sm">
+          ← 重選 Top 3
+        </button>
+        <button onclick="goToStep(4)" class="flex-grow py-3 rounded-xl bg-accent text-white font-bold text-sm sm:text-base shadow-sm hover:bg-accent/90 transition">
+          下一步：十字路口 A/B 路線對照 →
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== STEP 4: 十字路口模擬與恐懼拆解 ==================== -->
+    <section id="step4" class="step-section">
+      <div class="bg-card rounded-2xl p-5 sm:p-7 shadow-sm border border-borderWarm mb-5 space-y-6">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-sageLight text-sage text-xs font-bold mb-2">
+            階段 4 / 5｜決策天秤與壓力測試
+          </span>
+          <h2 class="font-serif text-xl sm:text-2xl font-bold text-ink mb-1">
+            十字路口的兩個選項（A vs. B）
+          </h2>
+          <p class="text-xs sm:text-sm text-muted">
+            寫下你目前最猶豫的兩個方向，並用剛選出的「三大價值觀」來為它們打分數（點擊星星評分）。
+          </p>
+        </div>
+
+        <!-- Option A & B Inputs -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-amberSoft/60 p-4 rounded-xl border border-borderWarm">
+            <label class="block text-xs font-bold text-accent mb-1">路線 A（選項一）</label>
+            <input type="text" id="optionA" placeholder="例如：畢業後直接進入職場實習留任"
+              class="w-full px-3 py-2 rounded-lg bg-white border border-borderWarm text-sm font-medium focus:outline-none focus:border-accent" />
+          </div>
+          <div class="bg-amberSoft/60 p-4 rounded-xl border border-borderWarm">
+            <label class="block text-xs font-bold text-sage mb-1">路線 B（選項二）</label>
+            <input type="text" id="optionB" placeholder="例如：報考科大繼續進修或跨領域學習"
+              class="w-full px-3 py-2 rounded-lg bg-white border border-borderWarm text-sm font-medium focus:outline-none focus:border-sage" />
           </div>
         </div>
 
-        <!-- 區塊 2：A vs B 路線星級對決 -->
-        <div class="bg-white/90 rounded-2xl p-4 border border-stone-200/90 space-y-3">
-          <h3 class="text-xs font-bold tracking-wider text-muted uppercase">02 / 十字路口模擬：路線契合度</h3>
+        <!-- Star Rating Matrix -->
+        <div class="border border-borderWarm rounded-xl overflow-hidden">
+          <div class="bg-amberSoft px-4 py-2.5 border-b border-borderWarm grid grid-cols-12 text-xs font-bold text-ink">
+            <div class="col-span-4">價值觀契合度</div>
+            <div class="col-span-4 text-center text-accent">路線 A</div>
+            <div class="col-span-4 text-center text-sage">路線 B</div>
+          </div>
+          <div id="starMatrixBody" class="divide-y divide-borderWarm bg-white">
+            <!-- Star rows injected by JS -->
+          </div>
+          <div class="bg-paper px-4 py-2.5 border-t border-borderWarm grid grid-cols-12 text-xs font-bold">
+            <div class="col-span-4 text-muted">總分加總</div>
+            <div class="col-span-4 text-center text-accent text-sm" id="totalScoreA">0 / 15 ★</div>
+            <div class="col-span-4 text-center text-sage text-sm" id="totalScoreB">0 / 15 ★</div>
+          </div>
+        </div>
+
+        <!-- Fear Deconstruction -->
+        <div class="bg-accentLight/50 rounded-xl p-4 sm:p-5 border border-accent/20 space-y-3">
+          <h3 class="font-bold text-sm text-ink flex items-center gap-1.5">
+            <span>🛡️</span> 恐懼拆解實驗：把擔憂變成具體對策
+          </h3>
+          <div>
+            <label class="block text-xs font-medium text-muted mb-1">走這條路，我最害怕發生的「最壞情況」是什麼？</label>
+            <input type="text" id="worstFear" placeholder="例如：怕選錯科系浪費時間，或薪水太低養不活自己"
+              class="w-full px-3 py-2 rounded-lg bg-white border border-borderWarm text-sm focus:outline-none focus:border-accent" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-muted mb-1">如果最壞情況真的發生，我的 Plan B（補救方法）是什麼？</label>
+            <input type="text" id="planB" placeholder="例如：先做半年存一筆預備金，不適合隨時可以轉職或重新考照"
+              class="w-full px-3 py-2 rounded-lg bg-white border border-borderWarm text-sm focus:outline-none focus:border-accent" />
+          </div>
+        </div>
+
+        <!-- 7-Day Micro Action -->
+        <div class="bg-sageLight/60 rounded-xl p-4 sm:p-5 border border-sage/20 space-y-2">
+          <h3 class="font-bold text-sm text-ink flex items-center gap-1.5">
+            <span>🌱</span> 未來 7 天的微行動承諾（MVP）
+          </h3>
+          <p class="text-xs text-muted">你不需要現在看清整條路，只需要看清下一步踩在哪裡。這週你願意做的一件小事是？</p>
+          <input type="text" id="microAction" placeholder="例如：這週五前找學長姐或老師聊 15 分鐘、查一間公司的職缺條件"
+            class="w-full px-3 py-2.5 rounded-lg bg-white border border-borderWarm text-sm focus:outline-none focus:border-sage" />
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="goToStep(3)" class="px-4 py-3 rounded-xl bg-white border border-borderWarm text-muted font-medium text-sm">
+          ← 返回上一步
+        </button>
+        <button onclick="generateFinalCard()" class="flex-grow py-3.5 rounded-xl bg-accent text-white font-bold text-sm sm:text-base shadow-sm hover:bg-accent/90 transition">
+          ✨ 生成我的《生涯決策羅盤》成果卡
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== STEP 5: 成果總結圖卡與同儕回饋 ==================== -->
+    <section id="step5" class="step-section">
+      <div class="mb-4 text-center">
+        <span class="inline-block px-3 py-1 rounded-full bg-sageLight text-sage text-xs font-bold mb-1">
+          🎉 探索完成！請將此畫面傳送給老師並下載圖卡
+        </span>
+        <p class="text-xs text-muted">可邀請同組夥伴在最下方輸入回饋後，點擊「傳送資料給老師」與「下載結果圖卡」</p>
+      </div>
+
+      <!-- EXPORTABLE RESULT CARD AREA -->
+      <div id="exportCardArea" class="bg-[#FAF8F5] rounded-2xl p-5 sm:p-7 border-2 border-ink/80 shadow-md relative overflow-hidden mb-5">
+        <!-- Decorative Corner -->
+        <div class="flex justify-between items-start border-b border-borderWarm pb-4 mb-4">
+          <div>
+            <div class="text-[11px] font-bold tracking-widest text-accent uppercase">MY CAREER COMPASS</div>
+            <h2 class="font-serif text-xl sm:text-2xl font-bold text-ink mt-0.5">我的生涯決策與價值觀羅盤</h2>
+          </div>
+          <div class="text-right">
+            <div id="cardStudentInfo" class="text-xs sm:text-sm font-bold text-ink">探索者</div>
+            <div id="cardDate" class="text-[11px] text-muted mt-0.5">2026</div>
+          </div>
+        </div>
+
+        <!-- Core Top 3 Values -->
+        <div class="mb-5">
+          <div class="text-xs font-bold text-muted mb-2 flex items-center justify-between">
+            <span>🧭 我的三大核心價值觀（羅盤中心）</span>
+            <span id="cardInnerBadge" class="text-[11px] px-2 py-0.5 rounded bg-sageLight text-sage font-bold">內在渴望 70%</span>
+          </div>
+          <div id="cardTop3List" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <!-- Top 3 Summary Cards -->
+          </div>
+        </div>
+
+        <!-- A vs B Comparison -->
+        <div class="bg-white rounded-xl p-4 border border-borderWarm mb-4">
+          <div class="text-xs font-bold text-muted mb-2.5">⚖️ 十字路口契合度評估</div>
           <div class="grid grid-cols-2 gap-3">
-            <div class="p-3 rounded-xl bg-terracottaLight/60 border border-terracotta/20">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-bold text-terracotta">路線 A</span>
-                <span id="card-score-a" class="text-sm font-bold text-terracotta">12 ★</span>
-              </div>
-              <p id="card-name-a" class="font-bold text-sm text-ink line-clamp-2">繼續升學讀大學</p>
-              <p id="card-pros-a" class="text-[11px] text-muted mt-1.5 line-clamp-2">✨ 吸引點：...</p>
+            <div class="p-3 rounded-lg bg-accentLight/50 border border-accent/20">
+              <div class="text-[11px] font-bold text-accent">路線 A</div>
+              <div id="cardOptionA" class="text-sm font-bold text-ink mt-0.5 truncate">未填寫</div>
+              <div id="cardScoreA" class="text-xs font-bold text-accent mt-1">0 / 15 ★</div>
             </div>
-
-            <div class="p-3 rounded-xl bg-slateBlueLight/70 border border-slateBlue/20">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[11px] font-bold text-slateBlue">路線 B</span>
-                <span id="card-score-b" class="text-sm font-bold text-slateBlue">10 ★</span>
-              </div>
-              <p id="card-name-b" class="font-bold text-sm text-ink line-clamp-2">先去業界實習工作</p>
-              <p id="card-pros-b" class="text-[11px] text-muted mt-1.5 line-clamp-2">✨ 吸引點：...</p>
+            <div class="p-3 rounded-lg bg-sageLight/50 border border-sage/20">
+              <div class="text-[11px] font-bold text-sage">路線 B</div>
+              <div id="cardOptionB" class="text-sm font-bold text-ink mt-0.5 truncate">未填寫</div>
+              <div id="cardScoreB" class="text-xs font-bold text-sage mt-1">0 / 15 ★</div>
             </div>
           </div>
         </div>
 
-        <!-- 區塊 3：Plan B 與 7 天微行動 -->
-        <div class="bg-white/90 rounded-2xl p-4 border border-stone-200/90 space-y-2.5">
-          <h3 class="text-xs font-bold tracking-wider text-muted uppercase">03 / 安全網與下一步承諾</h3>
-          <div class="text-xs space-y-1.5">
-            <p class="text-ink"><span class="font-bold text-plum">🛡️ 我的 Plan B：</span><span id="card-planb">...</span></p>
-            <div class="p-2.5 rounded-xl bg-sageLight/70 border border-sage/20 text-ink">
-              <p class="font-bold text-sage">🌱 <span id="card-mvp-date">7天內</span> 微行動承諾：</p>
-              <p id="card-mvp-action" class="mt-0.5 font-medium">...</p>
-            </div>
+        <!-- Fear & Plan B + Micro Action -->
+        <div class="space-y-2.5 text-xs sm:text-sm mb-4">
+          <div class="bg-white p-3 rounded-xl border border-borderWarm">
+            <span class="font-bold text-ink">🛡️ 恐懼與補救對策：</span>
+            <span id="cardFearPlan" class="text-muted">尚未填寫</span>
+          </div>
+          <div class="bg-sageLight/70 p-3 rounded-xl border border-sage/30">
+            <span class="font-bold text-sage">🌱 未來 7 天微行動：</span>
+            <span id="cardMicroAction" class="text-ink font-medium">尚未填寫</span>
           </div>
         </div>
 
-        <!-- 區塊 4：《人生顧問診所》夥伴回饋欄（可現場輸入） -->
-        <div class="bg-ochreLight/70 rounded-2xl p-3.5 border border-dashed border-ochre">
-          <label for="peer-feedback-input" class="block text-xs font-bold text-ochre mb-1">
-            💬 《人生顧問診所》夥伴眼中的亮點與簽名：
-          </label>
-          <textarea id="peer-feedback-input" rows="2"
-            placeholder="（小組分享時，請同學在這裡寫下對你的肯定與亮點，例如：我覺得你很看重自由與成長，這超棒的！— 小華）"
-            class="w-full bg-white/80 rounded-xl px-3 py-2 text-xs text-ink border border-ochre/30 focus:outline-none focus:border-ochre"></textarea>
-        </div>
-
-        <!-- 卡片頁尾浮水印 -->
-        <div class="flex items-center justify-between text-[10px] text-muted pt-1">
-          <span>價值觀拍賣會 × 生涯決策羅盤</span>
-          <span id="card-timestamp">2026</span>
+        <!-- Peer Feedback Section -->
+        <div class="bg-amberSoft/80 p-3.5 rounded-xl border border-dashed border-accent/50">
+          <label class="block text-xs font-bold text-accent mb-1">💬 《人生顧問診所》夥伴回饋欄（請同組同學幫你寫一句肯定）：</label>
+          <input type="text" id="peerFeedback" placeholder="例如：我覺得你很看重專業精進，選路線A非常有優勢！"
+            class="w-full bg-white/90 px-3 py-2 rounded-lg border border-borderWarm text-xs sm:text-sm text-ink focus:outline-none focus:border-accent" />
         </div>
       </div>
-      <!-- ===== 結果圖卡結束 ===== -->
 
-      <!-- 匯出與分享操作按鈕 -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <button type="button" onclick="downloadCardPNG()"
-          class="py-3.5 px-4 rounded-2xl bg-terracotta hover:bg-terracotta/90 text-white font-bold text-sm shadow-md shadow-terracotta/20 transition flex items-center justify-center gap-2">
-          <span>📥 一鍵下載結果圖卡 (PNG)</span>
+      <!-- Action Buttons -->
+      <div class="space-y-3">
+        <!-- Send to Google Sheets Button -->
+        <button id="sendSheetBtn" onclick="sendToGoogleSheet()" class="w-full py-3.5 rounded-xl bg-sage text-white font-bold text-base shadow-md hover:bg-sage/90 active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <span>☁️</span> 傳送資料給老師（同步至試算表）
         </button>
-        <button type="button" onclick="copyTextSummary()"
-          class="py-3.5 px-4 rounded-2xl bg-paper hover:bg-stone-100 border border-stone-300 text-ink font-bold text-sm transition flex items-center justify-center gap-2">
-          <span>📋 複製完整文字紀錄</span>
-        </button>
-      </div>
 
-      <div class="text-center pt-2">
-        <button type="button" onclick="goToStep(4)" class="text-xs text-muted underline hover:text-ink">
-          ← 返回修改內容
+        <button onclick="downloadCardImage()" class="w-full py-3.5 rounded-xl bg-ink text-white font-bold text-base shadow-md hover:bg-ink/90 active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <span>📥</span> 一鍵下載結果圖卡 (PNG)
         </button>
+
+        <div class="flex gap-3">
+          <button onclick="goToStep(4)" class="flex-1 py-2.5 rounded-xl bg-white border border-borderWarm text-muted font-medium text-xs sm:text-sm">
+            ← 修改內容
+          </button>
+          <button onclick="resetAll()" class="flex-1 py-2.5 rounded-xl bg-white border border-borderWarm text-muted font-medium text-xs sm:text-sm">
+            🔄 重新測驗
+          </button>
+        </div>
       </div>
     </section>
 
   </main>
 
+  <!-- Footer -->
+  <footer class="text-center py-4 text-[11px] text-muted border-t border-borderWarm/60">
+    SEL 社會情緒學習課程教具｜你不需要現在就看清整條路，只需要看清下一步踩在哪裡
+  </footer>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
   <script>
-    // ==================== 16 個核心價值觀資料庫 ====================
-    const CORE_VALUES = [
-      { id: 1,  title: '高薪收入',       cat: '物質保障', color: 'ochre',     desc: '賺取豐厚的金錢，能自由購買喜歡的東西、負擔高質感生活，不用為錢煩惱。' },
-      { id: 2,  title: '穩定安全',       cat: '物質保障', color: 'ochre',     desc: '工作有保障、收入固定，不會突然失業，生活規律且在可預測的範圍內。' },
-      { id: 3,  title: '工作與生活平衡', cat: '物質保障', color: 'ochre',     desc: '下班就是下班，保有充足睡眠與休閒時間，能陪伴親友或經營自己的興趣。' },
-      { id: 4,  title: '舒適的環境',     cat: '物質保障', color: 'ochre',     desc: '在乾淨、安全、步調適中、體力負荷不會過重的空間裡工作與生活。' },
-      { id: 5,  title: '創意與美感',     cat: '自我實現', color: 'terracotta',desc: '能發揮想像力、設計新點子、創造美的事物，不喜歡一成不變的 SOP。' },
-      { id: 6,  title: '自主與自由',     cat: '自我實現', color: 'terracotta',desc: '可以自己決定做事的方法與時間，討厭一直被盯著看的微觀管理。' },
-      { id: 7,  title: '專業與精進',     cat: '自我實現', color: 'terracotta',desc: '把一項技術或知識練到極致，成為別人眼中的職人或專家，享受變強的過程。' },
-      { id: 8,  title: '挑戰與冒險',     cat: '自我實現', color: 'terracotta',desc: '喜歡解決困難問題、接觸新鮮事物，甚至願意承擔失敗的風險去闖一闖。' },
-      { id: 9,  title: '團隊歸屬感',     cat: '人際情感', color: 'sage',      desc: '有一群志同道合的夥伴一起打拚、互相支援，喜歡「我們是一個團隊」的氣氛。' },
-      { id: 10, title: '助人與利他',     cat: '人際情感', color: 'sage',      desc: '透過自己的能力幫助別人解決困難、讓人快樂，覺得自己對社會有貢獻。' },
-      { id: 11, title: '家人與親密關係', cat: '人際情感', color: 'sage',      desc: '把陪伴家人、伴侶或摯友放在人生第一順位，工作只是為了支持這段關係。' },
-      { id: 12, title: '和諧與尊重',     cat: '人際情感', color: 'sage',      desc: '處在沒有勾心鬥角、彼此有禮貌且互相尊重的環境，討厭衝突與高壓謾罵。' },
-      { id: 13, title: '成就與認可',     cat: '社會影響', color: 'slateBlue', desc: '努力被看見、獲得獎項、升遷或他人的讚美，享受「我做到了」的榮耀感。' },
-      { id: 14, title: '影響力與領導',   cat: '社會影響', color: 'slateBlue', desc: '能夠帶領團隊、做決策、說服別人，讓事情照著你的規劃方向前進。' },
-      { id: 15, title: '社會地位與名聲', cat: '社會影響', color: 'slateBlue', desc: '擁有一份說出來會讓人覺得「好厲害、很體面」的職業或頭銜，受到社會尊敬。' },
-      { id: 16, title: '公平與正義',     cat: '社會影響', color: 'slateBlue', desc: '堅持原則、黑白分明，不能接受不合理、走後門或欺負弱小的事情發生。' }
+    // Google Apps Script Web App URL
+    const GAS_URL = "https://script.google.com/a/macros/kpvs.tp.edu.tw/s/AKfycbwxmjHLCTOSn1EtQy520SbDoVtkDHaB019CaU9L-TarIXtJIRxlkYOFqbEiq0HUcZZ6/exec";
+
+    // 16 Core Values Data
+    const VALUES_DATA = [
+      { id: 1, category: "物質保障", title: "高薪收入", desc: "賺取豐厚金錢，能自由購買喜歡的東西、負擔高質感生活，不用為錢煩惱。" },
+      { id: 2, category: "物質保障", title: "穩定安全", desc: "工作有保障、收入固定，不會突然失業，生活規律且在可預測的範圍內。" },
+      { id: 3, category: "物質保障", title: "工作與生活平衡", desc: "下班就是下班，保有充足睡眠與休閒時間，能陪伴親友或經營個人興趣。" },
+      { id: 4, category: "物質保障", title: "舒適的環境", desc: "在乾淨、安全、步調適中、體力負荷不會過重的空間裡工作與生活。" },
+      { id: 5, category: "自我實現", title: "創意與美感", desc: "能發揮想像力、設計新點子、創造美的事物，不喜歡一成不變的 SOP。" },
+      { id: 6, category: "自我實現", title: "自主與自由", desc: "可以自己決定做事的方法與時間，討厭一直被盯著看的微觀管理。" },
+      { id: 7, category: "自我實現", title: "專業與精進", desc: "把一項技術或知識練到極致，成為別人眼中的職人或專家，享受變強的過程。" },
+      { id: 8, category: "自我實現", title: "挑戰與冒險", desc: "喜歡解決困難問題、接觸新鮮事物，願意承擔失敗的風險去闖一闖。" },
+      { id: 9, category: "人際情感", title: "團隊歸屬感", desc: "有一群志同道合的夥伴一起打拚、互相支援，喜歡「我們是一個團隊」的氣氛。" },
+      { id: 10, category: "人際情感", title: "助人與利他", desc: "透過自己的能力幫助別人解決困難、讓人快樂，覺得自己對社會有貢獻。" },
+      { id: 11, category: "人際情感", title: "家人與親密關係", desc: "把陪伴家人、伴侶或摯友放在人生第一順位，工作只是為了支持這段關係。" },
+      { id: 12, category: "人際情感", title: "和諧與尊重", desc: "處在沒有勾心鬥角、彼此有禮貌且互相尊重的環境，討厭衝突與高壓謾罵。" },
+      { id: 13, category: "社會影響", title: "成就與認可", desc: "努力被看見、獲得獎項、升遷或他人的讚美，享受「我做到了」的榮耀感。" },
+      { id: 14, category: "社會影響", title: "影響力與領導", desc: "能夠帶領團隊、做決策、說服別人，讓事情照著你的規劃方向前進。" },
+      { id: 15, category: "社會影響", title: "社會地位與名聲", desc: "擁有一份說出來會讓人覺得「好厲害、很體面」的職業或頭銜，受到社會尊敬。" },
+      { id: 16, category: "社會影響", title: "公平與正義", desc: "堅持原則、黑白分明，不能接受不合理、走後門或欺負弱小的事情發生。" }
     ];
 
-    // 類別配色映射
-    const COLOR_STYLES = {
-      ochre:      { badge: 'bg-ochreLight text-ochre',           ring: 'border-ochre bg-ochreLight/40' },
-      terracotta: { badge: 'bg-terracottaLight text-terracotta', ring: 'border-terracotta bg-terracottaLight/40' },
-      sage:       { badge: 'bg-sageLight text-sage',             ring: 'border-sage bg-sageLight/40' },
-      slateBlue:  { badge: 'bg-slateBlueLight text-slateBlue',   ring: 'border-slateBlue bg-slateBlueLight/40' }
-    };
+    // State Management
+    let currentStep = 1;
+    let auctionRound = 1; // 1: 16->8, 2: 8->5, 3: 5->3
+    let poolRound1 = [...VALUES_DATA];
+    let poolRound2 = [];
+    let poolRound3 = [];
+    let selectedIds = new Set();
+    let finalTop3 = []; // Array of value objects
+    let ratingsA = [0, 0, 0];
+    let ratingsB = [0, 0, 0];
 
-    // ==================== 應用程式狀態 ====================
-    const state = {
-      currentStep: 0,
-      anxietyScore: 3,
-      // 拍賣會階段：1 (16選8), 2 (8選5), 3 (5選3)
-      auctionStage: 1,
-      stage1Selected: [], // 存 ID (目標 8 個)
-      stage2Selected: [], // 存 ID (目標 5 個)
-      stage3Selected: [], // 存 ID (目標 3 個，依點擊順序為 TOP 1, 2, 3)
-      definitions: {},    // { id: "一句話定義" }
-      selfPct: 70,
-      ratingsA: {},       // { id: 1~5 }
-      ratingsB: {}        // { id: 1~5 }
-    };
+    // Step Navigation
+    function goToStep(step) {
+      document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
+      document.getElementById(`step${step}`).classList.add('active');
+      currentStep = step;
 
-    // 初始化預設日期（7天後）
-    window.addEventListener('DOMContentLoaded', () => {
-      const nextWeek = new Date();
-      nextWeek.setDate(nextWeek.getDate() + 7);
-      const dateInput = document.getElementById('mvp-date');
-      if (dateInput) {
-        dateInput.value = nextWeek.toISOString().split('T')[0];
-      }
-      renderAuctionStage();
-    });
-
-    // ==================== 輕提示工具 ====================
-    let toastTimer = null;
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toast-msg');
-      toastMsg.textContent = msg;
-      toast.classList.remove('opacity-0', 'translate-y-2');
-      toast.classList.add('opacity-100', 'translate-y-0');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        toast.classList.remove('opacity-100', 'translate-y-0');
-      }, 2400);
-    }
-
-    // ==================== 步驟切換控制 ====================
-    const STEP_META = [
-      { subtitle: 'Step 0 / 5 · 暖身與情緒溫度計', progress: '12%' },
-      { subtitle: 'Step 1 / 5 · 《價值觀拍賣會》淘汰賽', progress: '32%' },
-      { subtitle: 'Step 2 / 5 · 羅盤中心與內在定義', progress: '54%' },
-      { subtitle: 'Step 3 / 5 · 十字路口 A/B 路線模擬', progress: '74%' },
-      { subtitle: 'Step 4 / 5 · 恐懼拆解與 7 天微行動', progress: '90%' },
-      { subtitle: 'Step 5 / 5 · 我的生涯決策羅盤總結卡', progress: '100%' }
-    ];
-
-    function goToStep(stepNum) {
-      // 步驟切換前的防呆檢查
-      if (stepNum === 2 && state.stage3Selected.length !== 3) {
-        showToast('請先在拍賣會選出最後 3 個核心價值觀喔！');
-        return;
-      }
-
-      // 隱藏所有步驟
-      for (let i = 0; i <= 5; i++) {
-        const el = document.getElementById(`step-${i}`);
-        if (el) el.classList.add('hidden');
-      }
-
-      // 進入特定步驟時的動態渲染
-      if (stepNum === 1) renderAuctionStage();
-      if (stepNum === 2) renderStep2Definitions();
-      if (stepNum === 3) renderStep3StarRatings();
-      if (stepNum === 4) updateFearRecap();
-
-      const targetEl = document.getElementById(`step-${stepNum}`);
-      targetEl.classList.remove('hidden');
-      state.currentStep = stepNum;
-
-      // 更新頂部進度條與副標題
-      document.getElementById('step-subtitle').textContent = STEP_META[stepNum].subtitle;
-      document.getElementById('progress-bar').style.width = STEP_META[stepNum].progress;
-
+      // Update Header Progress
+      document.getElementById('stepIndicator').innerText = `階段 ${step} / 5`;
+      document.getElementById('progressBar').style.width = `${step * 20}%`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
 
-    // ==================== Step 0: 情緒溫度計 ====================
-    const ANXIETY_TEXTS = {
-      1: '🌿 <strong>穩健前行的狀態：</strong> 1 分代表你目前心境相當平靜，或已經有一些方向。這堂課可以幫你進一步驗證你的選擇是否符合內心渴望！',
-      2: '🌤️ <strong>剛剛好的警覺心：</strong> 2 分的微緊張能幫助你保持思考清晰，我們一起透過價值觀幫你把方向看得更透徹。',
-      3: '💡 <strong>大腦正在保護你：</strong> 3 分的迷惘非常正常！就像走進有 500 道菜的自助餐，選擇變多反而讓人猶豫。接下來我們用遊戲幫你篩選出真正重要的菜色。',
-      4: '🫂 <strong>抱抱正在努力的你：</strong> 4 分的焦慮代表你很想把未來走好。別擔心，今天我們不急著做「一輩子的決定」，只要找出「下一步」就好。',
-      5: '🫶 <strong>深呼吸，你不是一個人：</strong> 5 分的壓力一定讓你很累吧？把腦中混亂的聲音交給這張羅盤，我們一步一步拆解，把大怪獸變成小任務。'
-    };
-
-    function setAnxiety(score) {
-      state.anxietyScore = score;
-      const buttons = document.querySelectorAll('.anxiety-btn');
-      buttons.forEach(btn => {
-        const s = Number(btn.dataset.score);
-        if (s === score) {
-          btn.className = 'anxiety-btn flex flex-col items-center p-3 rounded-2xl border-2 border-terracotta bg-terracottaLight transition transform scale-105';
-        } else {
-          btn.className = 'anxiety-btn flex flex-col items-center p-3 rounded-2xl border-2 border-stone-200 bg-cream/60 hover:border-terracotta/50 transition';
-        }
-      });
-      document.getElementById('anxiety-feedback').innerHTML = ANXIETY_TEXTS[score];
-    }
-
-    // ==================== Step 1: 《價值觀拍賣會》三階段淘汰邏輯 ====================
-    function renderAuctionStage() {
-      const stage = state.auctionStage;
-      const grid = document.getElementById('cards-grid');
-      const badge = document.getElementById('auction-badge');
-      const title = document.getElementById('auction-title');
-      const desc = document.getElementById('auction-desc');
-      const counter = document.getElementById('auction-counter');
-      const legend = document.getElementById('category-legend');
-      const rankHint = document.getElementById('stage3-rank-hint');
-      const nextBtn = document.getElementById('btn-auction-next');
-
-      let pool = [];
-      let selectedList = [];
-      let targetCount = 8;
-
-      if (stage === 1) {
-        pool = CORE_VALUES;
-        selectedList = state.stage1Selected;
-        targetCount = 8;
-        badge.textContent = '第一輪：海選階段 (16 選 8)';
-        badge.className = 'px-3 py-1 rounded-full bg-terracottaLight text-terracotta text-xs font-bold';
-        title.textContent = '選出你有感覺的 8 個價值觀';
-        desc.innerHTML = '這 16 張牌沒有好壞之分。請直覺點擊：<strong>「如果沒有這個東西，我的人生會覺得很空虛」</strong>的 8 張牌。';
-        legend.classList.remove('hidden');
-        rankHint.classList.add('hidden');
-      } else if (stage === 2) {
-        pool = CORE_VALUES.filter(v => state.stage1Selected.includes(v.id));
-        selectedList = state.stage2Selected;
-        targetCount = 5;
-        badge.textContent = '第二輪：忍痛割愛 (8 選 5)';
-        badge.className = 'px-3 py-1 rounded-full bg-ochreLight text-ochre text-xs font-bold';
-        title.textContent = '人生資源有限，請忍痛淘汰 3 張';
-        desc.innerHTML = '想像你的人生遇到關卡，必須割捨部分條件。請從這 8 張中，留下<strong>更不能妥協的 5 張</strong>。';
-        legend.classList.add('hidden');
-        rankHint.classList.add('hidden');
-      } else if (stage === 3) {
-        pool = CORE_VALUES.filter(v => state.stage2Selected.includes(v.id));
-        selectedList = state.stage3Selected;
-        targetCount = 3;
-        badge.textContent = '最終決戰：核心底線 (5 選 3)';
-        badge.className = 'px-3 py-1 rounded-full bg-sageLight text-sage text-xs font-bold';
-        title.textContent = '留下你靈魂深處最核心的 3 張牌';
-        desc.innerHTML = '最後一步！如果沒有這 3 個價值觀，你會覺得活得不像自己。<strong>依序點擊排出 TOP 1 ~ TOP 3</strong>。';
-        legend.classList.add('hidden');
-        rankHint.classList.remove('hidden');
+      if (step === 2) {
+        renderAuctionRound();
+      } else if (step === 3) {
+        renderTop3Definitions();
+      } else if (step === 4) {
+        renderStarMatrix();
       }
+    }
 
-      // 更新計數器
-      counter.innerHTML = `已選 <span class="text-terracotta text-base">${selectedList.length}</span> / ${targetCount} 張`;
+    // Anxiety Slider Label
+    function updateAnxietyText(val) {
+      const labels = {
+        1: "1 分（非常平靜）",
+        2: "2 分（有一點想法）",
+        3: "3 分（有點迷惘）",
+        4: "4 分（相當焦慮）",
+        5: "5 分（壓力山大）"
+      };
+      document.getElementById('anxietyLabel').innerText = labels[val];
+    }
 
-      // 更新下一步按鈕狀態
-      if (selectedList.length === targetCount) {
-        nextBtn.disabled = false;
-        nextBtn.className = 'flex-1 py-3.5 rounded-2xl bg-terracotta hover:bg-terracotta/90 text-white font-bold text-sm shadow-md shadow-terracotta/20 transition flex items-center justify-center gap-2 cursor-pointer';
-        nextBtn.innerHTML = stage < 3
-          ? `<span>進入下一輪淘汰</span><span>→</span>`
-          : `<span>確認 TOP 3，進入羅盤校準</span><span>→</span>`;
+    // ==================== AUCTION LOGIC (STEP 2) ====================
+    function getRoundConfig() {
+      if (auctionRound === 1) {
+        return {
+          pool: poolRound1,
+          target: 8,
+          badge: "第一輪海選：16 選 8",
+          title: "請從 16 張價值觀中，圈出「我有興趣的 8 個」",
+          desc: "沒有好壞之分，憑直覺點擊你覺得「人生中很重要」的卡片。"
+        };
+      } else if (auctionRound === 2) {
+        return {
+          pool: poolRound2,
+          target: 5,
+          badge: "第二輪淘汰：8 選 5",
+          title: "想像人生遇到危機，必須忍痛放棄 3 個，留下 5 個",
+          desc: "這 8 個都很重要，但如果只能保留 5 個，哪幾個你絕對不願放手？"
+        };
       } else {
-        nextBtn.disabled = true;
-        nextBtn.className = 'flex-1 py-3.5 rounded-2xl bg-stone-200 text-stone-500 font-bold text-sm transition flex items-center justify-center gap-2 cursor-not-allowed';
-        nextBtn.innerHTML = `<span>還需選擇 ${targetCount - selectedList.length} 張</span>`;
+        return {
+          pool: poolRound3,
+          target: 3,
+          badge: "最終決戰：5 選 3",
+          title: "選出你人生的「三大核心底線」",
+          desc: "如果沒有這 3 個價值觀，你的人生會覺得很空虛或痛苦。"
+        };
       }
+    }
 
-      // 渲染卡片
-      grid.innerHTML = pool.map(item => {
-        const isSelected = selectedList.includes(item.id);
-        const rankIndex = stage === 3 ? selectedList.indexOf(item.id) : -1;
-        const style = COLOR_STYLES[item.color];
+    function renderAuctionRound() {
+      const cfg = getRoundConfig();
+      document.getElementById('roundBadge').innerText = cfg.badge;
+      document.getElementById('roundTitle').innerText = cfg.title;
+      document.getElementById('roundDesc').innerText = cfg.desc;
+      document.getElementById('targetCount').innerText = cfg.target;
+      updateSelectionUI();
 
-        // 在第2、3輪，未選中的卡片呈現「被割捨/淡化」視覺對比
-        const cardStateClass = isSelected
-          ? `border-2 ${style.ring} shadow-sm`
-          : (stage > 1 ? 'border border-stone-200/80 bg-white/60 opacity-75 hover:opacity-100' : 'border border-stone-200 bg-paper hover:border-stone-300');
+      const grid = document.getElementById('cardsGrid');
+      grid.innerHTML = '';
 
-        return `
-          <div onclick="toggleValueCard(${item.id})"
-            class="value-card cursor-pointer rounded-2xl p-4 select-none relative ${cardStateClass}">
-            <div class="flex items-start justify-between gap-2 mb-1.5">
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-bold px-2 py-0.5 rounded-md ${style.badge}">${item.cat}</span>
-                <h4 class="font-bold text-base text-ink">${item.id}. ${item.title}</h4>
-              </div>
-              ${isSelected
-                ? (stage === 3
-                    ? `<span class="px-2.5 py-0.5 rounded-full bg-sage text-white text-xs font-bold shadow-sm">TOP ${rankIndex + 1}</span>`
-                    : `<span class="w-6 h-6 rounded-full bg-terracotta text-white flex items-center justify-center text-xs font-bold shadow-sm">✓</span>`)
-                : `<span class="w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center text-xs text-transparent">✓</span>`
-              }
+      cfg.pool.forEach(item => {
+        const isSelected = selectedIds.has(item.id);
+        const card = document.createElement('div');
+        card.className = `card-transition cursor-pointer rounded-xl p-4 bg-white border-2 select-none flex flex-col justify-between ${
+          isSelected ? 'card-selected' : 'border-borderWarm hover:border-accent/50'
+        }`;
+        card.onclick = () => toggleCardSelection(item.id, cfg.target);
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[11px] font-medium px-2 py-0.5 rounded bg-amberSoft text-muted">${item.category}</span>
+              <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                isSelected ? 'bg-accent text-white' : 'border border-borderWarm text-transparent'
+              }">✓</span>
             </div>
+            <h4 class="font-bold text-base text-ink mb-1">${item.id}. ${item.title}</h4>
             <p class="text-xs text-muted leading-relaxed">${item.desc}</p>
           </div>
         `;
-      }).join('');
+        grid.appendChild(card);
+      });
     }
 
-    function toggleValueCard(id) {
-      const stage = state.auctionStage;
-      let listKey = stage === 1 ? 'stage1Selected' : (stage === 2 ? 'stage2Selected' : 'stage3Selected');
-      let maxCount = stage === 1 ? 8 : (stage === 2 ? 5 : 3);
-      let currentList = state[listKey];
-
-      if (currentList.includes(id)) {
-        state[listKey] = currentList.filter(item => item !== id);
+    function toggleCardSelection(id, target) {
+      if (selectedIds.has(id)) {
+        selectedIds.delete(id);
       } else {
-        if (currentList.length >= maxCount) {
-          showToast(`本輪最多只能保留 ${maxCount} 張牌！請先取消一張再選。`);
+        if (selectedIds.size >= target) {
+          // Briefly shake counter to indicate max reached
+          const counter = document.getElementById('selectionCounter');
+          counter.classList.add('scale-105', 'border-accent');
+          setTimeout(() => counter.classList.remove('scale-105', 'border-accent'), 200);
           return;
         }
-        state[listKey] = [...currentList, id];
+        selectedIds.add(id);
       }
-      renderAuctionStage();
+      renderAuctionRound();
     }
 
-    function handleAuctionNext() {
-      const stage = state.auctionStage;
-      if (stage === 1 && state.stage1Selected.length === 8) {
-        // 清理 stage2 不在 stage1 內的舊紀錄
-        state.stage2Selected = state.stage2Selected.filter(id => state.stage1Selected.includes(id));
-        state.auctionStage = 2;
-        renderAuctionStage();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (stage === 2 && state.stage2Selected.length === 5) {
-        state.stage3Selected = state.stage3Selected.filter(id => state.stage2Selected.includes(id));
-        state.auctionStage = 3;
-        renderAuctionStage();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (stage === 3 && state.stage3Selected.length === 3) {
-        goToStep(2);
+    function updateSelectionUI() {
+      const cfg = getRoundConfig();
+      const count = selectedIds.size;
+      const diff = cfg.target - count;
+      document.getElementById('selectedCount').innerText = count;
+
+      const btn = document.getElementById('nextRoundBtn');
+      if (diff === 0) {
+        btn.disabled = false;
+        btn.innerText = auctionRound < 3 ? `確認這 ${cfg.target} 項，進入下一輪 →` : `鎖定三大核心價值觀 →`;
+      } else {
+        btn.disabled = true;
+        btn.innerText = `還差 ${diff} 項即可繼續`;
       }
     }
 
-    function handleAuctionBack() {
-      if (state.auctionStage > 1) {
-        state.auctionStage -= 1;
-        renderAuctionStage();
+    function handleRoundNext() {
+      const cfg = getRoundConfig();
+      if (selectedIds.size !== cfg.target) return;
+
+      const chosenItems = cfg.pool.filter(item => selectedIds.has(item.id));
+      if (auctionRound === 1) {
+        poolRound2 = chosenItems;
+        auctionRound = 2;
+        selectedIds.clear();
+        renderAuctionRound();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (auctionRound === 2) {
+        poolRound3 = chosenItems;
+        auctionRound = 3;
+        selectedIds.clear();
+        renderAuctionRound();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        goToStep(0);
+        finalTop3 = chosenItems;
+        goToStep(3);
       }
     }
 
-    // ==================== Step 2: 定義與內心誠實度 ====================
-    function renderStep2Definitions() {
-      const container = document.getElementById('top3-definitions-container');
-      const top3Items = state.stage3Selected.map(id => CORE_VALUES.find(v => v.id === id));
-
-      container.innerHTML = top3Items.map((item, idx) => {
-        const savedVal = state.definitions[item.id] || '';
-        const style = COLOR_STYLES[item.color];
-        return `
-          <div class="bg-paper rounded-3xl p-5 shadow-sm border border-stone-200/80 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="px-2.5 py-0.5 rounded-full bg-sage text-white text-xs font-bold">TOP ${idx + 1}</span>
-                <h3 class="font-bold text-lg text-ink">${item.title}</h3>
-              </div>
-              <span class="text-[11px] px-2 py-0.5 rounded-md ${style.badge}">${item.cat}</span>
-            </div>
-            <p class="text-xs text-muted">${item.desc}</p>
-            <div class="pt-1">
-              <label class="block text-xs font-bold text-ink mb-1">
-                ✍️ 用一句話定義它對你的意義（沒有它，我會覺得……）：
-              </label>
-              <input type="text"
-                value="${savedVal.replace(/"/g, '&quot;')}"
-                oninput="state.definitions[${item.id}] = this.value"
-                placeholder="例：對我來說，這代表我可以自己掌握節奏，不會像機器人一樣..."
-                class="w-full px-3.5 py-2.5 rounded-xl bg-cream border border-stone-200 text-sm focus:outline-none focus:border-sage transition" />
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function updateHonestySlider(val) {
-      const selfPct = Number(val);
-      const otherPct = 100 - selfPct;
-      state.selfPct = selfPct;
-
-      document.getElementById('self-pct-label').textContent = selfPct;
-      document.getElementById('other-pct-label').textContent = otherPct;
-
-      const feedbackBox = document.getElementById('honesty-feedback');
-      if (otherPct > 50) {
-        feedbackBox.className = 'p-3.5 rounded-2xl bg-ochreLight border border-ochre/40 text-ink text-xs sm:text-sm leading-relaxed';
-        feedbackBox.innerHTML = `🤔 <strong>溫柔提醒（別人期待佔 ${otherPct}%）：</strong> 你的價值觀似乎背負了不少爸媽或社會的眼光。試著問自己：「如果沒有人會評價我，我還是一樣選這 3 個嗎？」（如果需要調整，可以按左下角重選卡片喔！）`;
+    function handleRoundBack() {
+      if (auctionRound === 3) {
+        auctionRound = 2;
+        selectedIds = new Set(poolRound3.map(i => i.id));
+        renderAuctionRound();
+      } else if (auctionRound === 2) {
+        auctionRound = 1;
+        selectedIds = new Set(poolRound2.map(i => i.id));
+        renderAuctionRound();
       } else {
-        feedbackBox.className = 'p-3.5 rounded-2xl bg-sageLight text-sage text-xs sm:text-sm leading-relaxed';
-        feedbackBox.innerHTML = `✨ <strong>很棒的內在覺察（自己想要佔 ${selfPct}%）：</strong> 你很清楚自己內心真正的渴望，這三個價值觀將會是你做決定時最強大的指南針！`;
+        goToStep(1);
       }
     }
 
-    // ==================== Step 3: 十字路口 A/B 選擇星級評分 ====================
-    function applyRoutePreset(nameA, nameB) {
-      document.getElementById('option-a-name').value = nameA;
-      document.getElementById('option-b-name').value = nameB;
-      syncOptionNames();
-      showToast('已套用參考選擇名稱，你也可以自由修改！');
+    function backToRound3() {
+      auctionRound = 3;
+      selectedIds = new Set(finalTop3.map(i => i.id));
+      goToStep(2);
     }
 
-    function syncOptionNames() {
-      const nameA = document.getElementById('option-a-name').value.trim() || '選擇 A';
-      const nameB = document.getElementById('option-b-name').value.trim() || '選擇 B';
-      document.querySelectorAll('.label-opt-a').forEach(el => el.textContent = nameA);
-      document.querySelectorAll('.label-opt-b').forEach(el => el.textContent = nameB);
-    }
+    // ==================== STEP 3: TOP 3 DEFINITIONS ====================
+    function renderTop3Definitions() {
+      const container = document.getElementById('top3DefinitionsContainer');
+      container.innerHTML = '';
 
-    function renderStep3StarRatings() {
-      const container = document.getElementById('star-rating-rows');
-      const top3Items = state.stage3Selected.map(id => CORE_VALUES.find(v => v.id === id));
-
-      container.innerHTML = top3Items.map((item, idx) => {
-        const scoreA = state.ratingsA[item.id] || 0;
-        const scoreB = state.ratingsB[item.id] || 0;
-
-        return `
-          <div class="p-4 rounded-2xl bg-cream/80 border border-stone-200 space-y-3">
-            <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded-md bg-sage text-white text-[11px] font-bold">TOP ${idx + 1}</span>
-              <span class="font-bold text-sm text-ink">符合「${item.title}」的程度</span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <!-- 選擇 A 星星 -->
-              <div class="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-terracotta/20">
-                <span class="text-xs font-bold text-terracotta truncate max-w-[110px] label-opt-a">${document.getElementById('option-a-name').value.trim() || '路線 A'}</span>
-                <div class="flex gap-1">
-                  ${[1, 2, 3, 4, 5].map(star => `
-                    <button type="button" onclick="setStarRating('A', ${item.id}, ${star})"
-                      class="text-xl leading-none transition transform active:scale-125 ${star <= scoreA ? 'text-amber-400' : 'text-stone-300'}">
-                      ★
-                    </button>
-                  `).join('')}
-                </div>
-              </div>
-
-              <!-- 選擇 B 星星 -->
-              <div class="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slateBlue/20">
-                <span class="text-xs font-bold text-slateBlue truncate max-w-[110px] label-opt-b">${document.getElementById('option-b-name').value.trim() || '路線 B'}</span>
-                <div class="flex gap-1">
-                  ${[1, 2, 3, 4, 5].map(star => `
-                    <button type="button" onclick="setStarRating('B', ${item.id}, ${star})"
-                      class="text-xl leading-none transition transform active:scale-125 ${star <= scoreB ? 'text-amber-400' : 'text-stone-300'}">
-                      ★
-                    </button>
-                  `).join('')}
-                </div>
-              </div>
-            </div>
+      finalTop3.forEach((val, idx) => {
+        const existingInput = document.getElementById(`defInput_${idx}`)?.value || '';
+        const box = document.createElement('div');
+        box.className = 'bg-amberSoft/60 p-4 rounded-xl border border-borderWarm';
+        box.innerHTML = `
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-0.5 rounded bg-accent text-white text-xs font-bold">TOP ${idx + 1}</span>
+            <span class="font-bold text-base text-ink">${val.title}</span>
+            <span class="text-xs text-muted">(${val.category})</span>
           </div>
+          <input type="text" id="defInput_${idx}" value="${existingInput}"
+            placeholder="用一句話寫下「${val.title}」對你的意義（例如：沒有它，我會覺得……）"
+            class="w-full px-3 py-2 rounded-lg bg-white border border-borderWarm text-xs sm:text-sm focus:outline-none focus:border-accent" />
         `;
-      }).join('');
-
-      updateTotalStars();
+        container.appendChild(box);
+      });
     }
 
-    function setStarRating(route, valueId, stars) {
+    function updateInnerRatio(val) {
+      const other = 100 - val;
+      document.getElementById('innerRatioText').innerText = `自己想要 ${val}% ／ 別人期待 ${other}%`;
+      const warn = document.getElementById('innerWarning');
+      if (val < 50) {
+        warn.classList.remove('hidden');
+      } else {
+        warn.classList.add('hidden');
+      }
+    }
+
+    // ==================== STEP 4: STAR MATRIX ====================
+    function renderStarMatrix() {
+      const tbody = document.getElementById('starMatrixBody');
+      tbody.innerHTML = '';
+
+      finalTop3.forEach((val, idx) => {
+        const row = document.createElement('div');
+        row.className = 'px-4 py-3 grid grid-cols-12 items-center gap-1';
+
+        const starsAHTML = [1, 2, 3, 4, 5].map(star => `
+          <button type="button" onclick="setStar('A', ${idx}, ${star})"
+            class="text-base sm:text-lg focus:outline-none transition transform active:scale-125 ${
+              star <= ratingsA[idx] ? 'text-accent' : 'text-borderWarm'
+            }">★</button>
+        `).join('');
+
+        const starsBHTML = [1, 2, 3, 4, 5].map(star => `
+          <button type="button" onclick="setStar('B', ${idx}, ${star})"
+            class="text-base sm:text-lg focus:outline-none transition transform active:scale-125 ${
+              star <= ratingsB[idx] ? 'text-sage' : 'text-borderWarm'
+            }">★</button>
+        `).join('');
+
+        row.innerHTML = `
+          <div class="col-span-4 text-xs sm:text-sm font-bold text-ink pr-1">${val.title}</div>
+          <div class="col-span-4 flex justify-center gap-0.5 sm:gap-1">${starsAHTML}</div>
+          <div class="col-span-4 flex justify-center gap-0.5 sm:gap-1">${starsBHTML}</div>
+        `;
+        tbody.appendChild(row);
+      });
+
+      const sumA = ratingsA.reduce((a, b) => a + b, 0);
+      const sumB = ratingsB.reduce((a, b) => a + b, 0);
+      document.getElementById('totalScoreA').innerText = `${sumA} / 15 ★`;
+      document.getElementById('totalScoreB').innerText = `${sumB} / 15 ★`;
+    }
+
+    function setStar(route, idx, score) {
       if (route === 'A') {
-        state.ratingsA[valueId] = stars;
+        ratingsA[idx] = score;
       } else {
-        state.ratingsB[valueId] = stars;
+        ratingsB[idx] = score;
       }
-      renderStep3StarRatings();
+      renderStarMatrix();
     }
 
-    function updateTotalStars() {
-      let totalA = 0;
-      let totalB = 0;
-      state.stage3Selected.forEach(id => {
-        totalA += (state.ratingsA[id] || 0);
-        totalB += (state.ratingsB[id] || 0);
-      });
-      document.getElementById('score-a-total').textContent = totalA;
-      document.getElementById('score-b-total').textContent = totalB;
-    }
+    // ==================== STEP 5: GENERATE FINAL CARD & EXPORT ====================
+    function generateFinalCard() {
+      const classSeat = document.getElementById('inputClassSeat').value.trim();
+      const name = document.getElementById('inputName').value.trim() || '匿名探索者';
+      document.getElementById('cardStudentInfo').innerText = classSeat ? `${classSeat}｜${name}` : name;
 
-    // ==================== Step 4: 恐懼回顧提示 ====================
-    function updateFearRecap() {
-      const fearA = document.getElementById('opt-a-fear').value.trim();
-      const fearB = document.getElementById('opt-b-fear').value.trim();
-      const nameA = document.getElementById('option-a-name').value.trim() || '選擇 A';
-      const nameB = document.getElementById('option-b-name').value.trim() || '選擇 B';
-
-      const recapEl = document.getElementById('recap-fear-text');
-      if (!fearA && !fearB) {
-        recapEl.textContent = '（你剛剛沒有填寫具體恐懼，可以直接在下方思考目前最讓你猶豫的擔憂！）';
-      } else {
-        let lines = [];
-        if (fearA) lines.push(`• 【${nameA}】害怕：${fearA}`);
-        if (fearB) lines.push(`• 【${nameB}】害怕：${fearB}`);
-        recapEl.innerHTML = lines.join('<br>');
-      }
-    }
-
-    // ==================== Step 5: 生成總結圖卡與匯出 ====================
-    function generateSummaryCard() {
-      // 1. 學生基本資料與情緒
-      const cls = document.getElementById('input-class').value.trim() || '班級未填';
-      const seat = document.getElementById('input-seat').value.trim() || '-';
-      const name = document.getElementById('input-name').value.trim() || '探索者';
-      document.getElementById('card-student-info').textContent = `${cls} · ${seat} 號 · ${name}`;
-
-      const emojiMap = { 1: '😌', 2: '🙂', 3: '🤔', 4: '😰', 5: '🤯' };
-      document.getElementById('card-anxiety-badge').textContent = `${state.anxietyScore} / 5 分 ${emojiMap[state.anxietyScore]}`;
-
-      // 2. Top 3 核心價值觀與內心比例
-      document.getElementById('card-honesty-tag').textContent = `內在渴望 ${state.selfPct}% · 外在期待 ${100 - state.selfPct}%`;
-      const top3ListEl = document.getElementById('card-top3-list');
-      const top3Items = state.stage3Selected.map(id => CORE_VALUES.find(v => v.id === id));
-
-      top3ListEl.innerHTML = top3Items.map((item, idx) => {
-        const def = (state.definitions[item.id] || '').trim() || item.desc;
-        return `
-          <div class="bg-white/95 rounded-2xl p-3 border border-stone-200/90 flex items-start gap-2.5">
-            <span class="px-2 py-0.5 rounded-lg bg-sage text-white text-xs font-bold shrink-0 mt-0.5">TOP ${idx + 1}</span>
-            <div>
-              <p class="font-bold text-sm text-ink">${item.title}</p>
-              <p class="text-xs text-muted mt-0.5 leading-snug">${def}</p>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      // 3. A vs B 選擇對照
-      const nameA = document.getElementById('option-a-name').value.trim() || '選擇 A（請自己命名）';
-      const nameB = document.getElementById('option-b-name').value.trim() || '選擇 B（請自己命名）';
-      let totalA = 0, totalB = 0;
-      state.stage3Selected.forEach(id => {
-        totalA += (state.ratingsA[id] || 0);
-        totalB += (state.ratingsB[id] || 0);
-      });
-
-      document.getElementById('card-name-a').textContent = nameA;
-      document.getElementById('card-name-b').textContent = nameB;
-      document.getElementById('card-score-a').textContent = `${totalA} / 15 ★`;
-      document.getElementById('card-score-b').textContent = `${totalB} / 15 ★`;
-
-      const prosA = document.getElementById('opt-a-pros').value.trim() || '思考中...';
-      const prosB = document.getElementById('opt-b-pros').value.trim() || '思考中...';
-      document.getElementById('card-pros-a').textContent = `✨ ${prosA}`;
-      document.getElementById('card-pros-b').textContent = `✨ ${prosB}`;
-
-      // 4. Plan B 與 7 天微行動
-      const planB = document.getElementById('fear-planb').value.trim() || '遇到困難時，我會尋求師長與夥伴的討論支持，隨時調整步伐。';
-      const mvpDate = document.getElementById('mvp-date').value || '未來 7 天內';
-      const mvpAction = document.getElementById('mvp-action').value.trim() || '主動蒐集一個相關資訊並與人討論';
-
-      document.getElementById('card-planb').textContent = planB;
-      document.getElementById('card-mvp-date').textContent = `${mvpDate} 前`;
-      document.getElementById('card-mvp-action').textContent = mvpAction;
-
-      // 時間戳記
       const today = new Date();
-      document.getElementById('card-timestamp').textContent = `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
+      document.getElementById('cardDate').innerText = `${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
+
+      const innerVal = document.getElementById('innerSlider').value;
+      document.getElementById('cardInnerBadge').innerText = `內在渴望 ${innerVal}%`;
+
+      // Render Top 3 Cards
+      const top3Container = document.getElementById('cardTop3List');
+      top3Container.innerHTML = '';
+      finalTop3.forEach((val, idx) => {
+        const customDef = document.getElementById(`defInput_${idx}`)?.value.trim() || val.desc;
+        const div = document.createElement('div');
+        div.className = 'bg-white p-3 rounded-xl border border-borderWarm';
+        div.innerHTML = `
+          <div class="text-[10px] font-bold text-accent">TOP ${idx + 1}</div>
+          <div class="font-bold text-sm text-ink mb-1">${val.title}</div>
+          <div class="text-[11px] text-muted leading-snug">${customDef}</div>
+        `;
+        top3Container.appendChild(div);
+      });
+
+      // Options & Scores
+      const optA = document.getElementById('optionA').value.trim() || '路線 A（未命名）';
+      const optB = document.getElementById('optionB').value.trim() || '路線 B（未命名）';
+      const sumA = ratingsA.reduce((a, b) => a + b, 0);
+      const sumB = ratingsB.reduce((a, b) => a + b, 0);
+
+      document.getElementById('cardOptionA').innerText = optA;
+      document.getElementById('cardScoreA').innerText = `契合度：${sumA} / 15 ★`;
+      document.getElementById('cardOptionB').innerText = optB;
+      document.getElementById('cardScoreB').innerText = `契合度：${sumB} / 15 ★`;
+
+      // Fear & Micro Action
+      const fear = document.getElementById('worstFear').value.trim();
+      const planB = document.getElementById('planB').value.trim();
+      if (fear || planB) {
+        document.getElementById('cardFearPlan').innerText = `最怕「${fear || '無'}」→ 補救對策：${planB || '無'}`;
+      } else {
+        document.getElementById('cardFearPlan').innerText = '已評估風險，保持彈性調整心態';
+      }
+
+      const micro = document.getElementById('microAction').value.trim() || '本週開始主動蒐集相關資訊並與師長討論';
+      document.getElementById('cardMicroAction').innerText = micro;
+
+      // Reset send button state when regenerating card
+      const sendBtn = document.getElementById('sendSheetBtn');
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<span>☁️</span> 傳送資料給老師（同步至試算表）';
+      sendBtn.classList.remove('opacity-70');
 
       goToStep(5);
     }
 
-    // 下載 PNG 圖卡
-    async function downloadCardPNG() {
-      const cardEl = document.getElementById('export-card');
-      showToast('正在產生高畫質圖卡，請稍候...');
-      try {
-        const canvas = await html2canvas(cardEl, {
-          scale: 2,
-          backgroundColor: '#FAF7F2',
-          useCORS: true
-        });
-        const link = document.createElement('a');
-        const name = document.getElementById('input-name').value.trim() || '我的';
-        link.download = `${name}_生涯決策羅盤.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        showToast('🎉 圖卡下載成功！可上傳至 Classroom 囉');
-      } catch (err) {
-        console.error(err);
-        showToast('匯出發生小狀況，建議直接使用手機螢幕截圖保存！');
-      }
+    // Send Data to Google Sheets via GAS
+    function sendToGoogleSheet() {
+      const btn = document.getElementById('sendSheetBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> 資料傳送中，請稍候...';
+
+      const sumA = ratingsA.reduce((a, b) => a + b, 0);
+      const sumB = ratingsB.reduce((a, b) => a + b, 0);
+      const optA = document.getElementById('optionA').value.trim();
+      const optB = document.getElementById('optionB').value.trim();
+      const fear = document.getElementById('worstFear').value.trim();
+      const planB = document.getElementById('planB').value.trim();
+
+      const def0 = document.getElementById('defInput_0')?.value.trim();
+      const def1 = document.getElementById('defInput_1')?.value.trim();
+      const def2 = document.getElementById('defInput_2')?.value.trim();
+
+      const payload = {
+        classSeat: document.getElementById('inputClassSeat').value.trim() || '未填寫',
+        studentName: document.getElementById('inputName').value.trim() || '匿名探索者',
+        top1: finalTop3[0] ? `${finalTop3[0].title}${def0 ? '（' + def0 + '）' : ''}` : '',
+        top2: finalTop3[1] ? `${finalTop3[1].title}${def1 ? '（' + def1 + '）' : ''}` : '',
+        top3: finalTop3[2] ? `${finalTop3[2].title}${def2 ? '（' + def2 + '）' : ''}` : '',
+        innerRatio: `${document.getElementById('innerSlider').value}%`,
+        optionA: optA ? `${optA} (${sumA}分)` : `未填寫 (${sumA}分)`,
+        optionB: optB ? `${optB} (${sumB}分)` : `未填寫 (${sumB}分)`,
+        fearPlanB: `最怕：${fear || '無'} / PlanB：${planB || '無'}`,
+        microAction: document.getElementById('microAction').value.trim() || '未填寫',
+        peerFeedback: document.getElementById('peerFeedback').value.trim() || '無'
+      };
+
+      fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        btn.innerHTML = '<span>✅</span> 已成功傳送給老師！';
+        btn.classList.add('opacity-85');
+        alert('🎉 傳送成功！老師的試算表已收到你的生涯決策羅盤紀錄。別忘了也可以點擊下方「下載結果圖卡」留存喔！');
+      })
+      .catch(err => {
+        console.error('傳送錯誤:', err);
+        btn.disabled = false;
+        btn.innerHTML = '<span>⚠️</span> 傳送失敗，請再點一次重試';
+        alert('傳送時發生網路異常，請確認網路連線或是否已登入學校 Google 帳號後再試一次。');
+      });
     }
 
-    // 複製純文字紀錄（使用 execCommand 相容 iFrame）
-    function copyTextSummary() {
-      const cls = document.getElementById('input-class').value.trim() || '未填班級';
-      const seat = document.getElementById('input-seat').value.trim() || '-';
-      const name = document.getElementById('input-name').value.trim() || '探索者';
-      const top3Items = state.stage3Selected.map(id => CORE_VALUES.find(v => v.id === id));
+    function downloadCardImage() {
+      const target = document.getElementById('exportCardArea');
+      const feedbackInput = document.getElementById('peerFeedback');
+      const feedbackVal = feedbackInput.value.trim();
 
-      let totalA = 0, totalB = 0;
-      state.stage3Selected.forEach(id => {
-        totalA += (state.ratingsA[id] || 0);
-        totalB += (state.ratingsB[id] || 0);
+      // Replace input with static text temporarily for clean canvas rendering
+      const tempSpan = document.createElement('div');
+      tempSpan.className = 'text-xs sm:text-sm text-ink font-medium bg-white/90 px-3 py-2 rounded-lg border border-borderWarm';
+      tempSpan.innerText = feedbackVal || '（小組夥伴現場口頭給予肯定與祝福 ✨）';
+      feedbackInput.style.display = 'none';
+      feedbackInput.parentNode.appendChild(tempSpan);
+
+      html2canvas(target, {
+        scale: 2,
+        backgroundColor: '#FAF8F5',
+        useCORS: true
+      }).then(canvas => {
+        // Restore input
+        tempSpan.remove();
+        feedbackInput.style.display = 'block';
+
+        const link = document.createElement('a');
+        const studentName = document.getElementById('inputName').value.trim() || '我的';
+        link.download = `${studentName}_生涯決策羅盤.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }).catch(err => {
+        tempSpan.remove();
+        feedbackInput.style.display = 'block';
+        alert('圖片生成遇到一點小問題，請直接使用手機或電腦截圖保存即可！');
       });
+    }
 
-      const nameA = document.getElementById('option-a-name').value.trim() || '選擇 A';
-      const nameB = document.getElementById('option-b-name').value.trim() || '選擇 B';
-      const planB = document.getElementById('fear-planb').value.trim() || '無';
-      const mvpDate = document.getElementById('mvp-date').value || '7天內';
-      const mvpAction = document.getElementById('mvp-action').value.trim() || '無';
-      const peerNote = document.getElementById('peer-feedback-input').value.trim() || '無';
-
-      const text = [
-        `🧭 【我的生涯決策羅盤】`,
-        `學生：${cls} ${seat}號 ${name}（課前焦慮指數：${state.anxietyScore}/5）`,
-        ``,
-        `一、我的三大核心價值觀（內在渴望 ${state.selfPct}% / 別人期待 ${100 - state.selfPct}%）`,
-        ...top3Items.map((item, i) => `TOP ${i + 1}【${item.title}】：${state.definitions[item.id] || item.desc}`),
-        ``,
-        `二、十字路口模擬`,
-        `• 選擇 A（${nameA}）：契合度 ${totalA}/15 ★`,
-        `• 選擇 B（${nameB}）：契合度 ${totalB}/15 ★`,
-        ``,
-        `三、安全網與微行動`,
-        `• 我的 Plan B：${planB}`,
-        `• ${mvpDate} 前微行動承諾：${mvpAction}`,
-        ``,
-        `四、《人生顧問診所》夥伴回饋：${peerNote}`
-      ].join('\n');
-
-      const tempArea = document.createElement('textarea');
-      tempArea.value = text;
-      document.body.appendChild(tempArea);
-      tempArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempArea);
-
-      showToast('📋 已複製完整文字紀錄！可直接貼上繳交');
+    function resetAll() {
+      if (!confirm('確定要清空目前填寫的內容並重新開始嗎？')) return;
+      auctionRound = 1;
+      selectedIds.clear();
+      finalTop3 = [];
+      ratingsA = [0, 0, 0];
+      ratingsB = [0, 0, 0];
+      document.getElementById('inputClassSeat').value = '';
+      document.getElementById('inputName').value = '';
+      document.getElementById('optionA').value = '';
+      document.getElementById('optionB').value = '';
+      document.getElementById('worstFear').value = '';
+      document.getElementById('planB').value = '';
+      document.getElementById('microAction').value = '';
+      document.getElementById('peerFeedback').value = '';
+      goToStep(1);
     }
   </script>
 </body>
