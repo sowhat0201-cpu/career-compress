@@ -269,12 +269,12 @@
         <!-- Option A & B Inputs -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="bg-amberSoft/60 p-4 rounded-xl border border-borderWarm">
-            <label class="block text-xs font-bold text-accent mb-1">選擇 A（選項一）</label>
+            <label class="block text-xs font-bold text-accent mb-1">路線 A（選項一）</label>
             <input type="text" id="optionA" placeholder="例如：畢業後直接進入職場實習留任"
               class="w-full px-3 py-2 rounded-lg bg-white border border-borderWarm text-sm font-medium focus:outline-none focus:border-accent" />
           </div>
           <div class="bg-amberSoft/60 p-4 rounded-xl border border-borderWarm">
-            <label class="block text-xs font-bold text-sage mb-1">選擇 B（選項二）</label>
+            <label class="block text-xs font-bold text-sage mb-1">路線 B（選項二）</label>
             <input type="text" id="optionB" placeholder="例如：報考科大繼續進修或跨領域學習"
               class="w-full px-3 py-2 rounded-lg bg-white border border-borderWarm text-sm font-medium focus:outline-none focus:border-sage" />
           </div>
@@ -284,8 +284,8 @@
         <div class="border border-borderWarm rounded-xl overflow-hidden">
           <div class="bg-amberSoft px-4 py-2.5 border-b border-borderWarm grid grid-cols-12 text-xs font-bold text-ink">
             <div class="col-span-4">價值觀契合度</div>
-            <div class="col-span-4 text-center text-accent">選擇 A</div>
-            <div class="col-span-4 text-center text-sage">選擇 B</div>
+            <div class="col-span-4 text-center text-accent">路線 A</div>
+            <div class="col-span-4 text-center text-sage">路線 B</div>
           </div>
           <div id="starMatrixBody" class="divide-y divide-borderWarm bg-white">
             <!-- Star rows injected by JS -->
@@ -335,13 +335,13 @@
       </div>
     </section>
 
-    <!-- ==================== STEP 5: 成果總結圖卡與同儕回饋 ==================== -->
+    <!-- ==================== STEP 5: 成果總結圖卡 ==================== -->
     <section id="step5" class="step-section">
       <div class="mb-4 text-center">
         <span class="inline-block px-3 py-1 rounded-full bg-sageLight text-sage text-xs font-bold mb-1">
           🎉 探索完成！請將此畫面傳送給老師並下載圖卡
         </span>
-        <p class="text-xs text-muted">可邀請同組夥伴在最下方輸入回饋後，點擊「傳送資料給老師」與「下載結果圖卡」</p>
+        <p class="text-xs text-muted">確認內容無誤後，請點擊下方「傳送資料給老師」與「下載結果圖卡」</p>
       </div>
 
       <!-- EXPORTABLE RESULT CARD AREA -->
@@ -374,12 +374,12 @@
           <div class="text-xs font-bold text-muted mb-2.5">⚖️ 十字路口契合度評估</div>
           <div class="grid grid-cols-2 gap-3">
             <div class="p-3 rounded-lg bg-accentLight/50 border border-accent/20">
-              <div class="text-[11px] font-bold text-accent">選擇 A</div>
+              <div class="text-[11px] font-bold text-accent">路線 A</div>
               <div id="cardOptionA" class="text-sm font-bold text-ink mt-0.5 truncate">未填寫</div>
               <div id="cardScoreA" class="text-xs font-bold text-accent mt-1">0 / 15 ★</div>
             </div>
             <div class="p-3 rounded-lg bg-sageLight/50 border border-sage/20">
-              <div class="text-[11px] font-bold text-sage">選擇 B</div>
+              <div class="text-[11px] font-bold text-sage">路線 B</div>
               <div id="cardOptionB" class="text-sm font-bold text-ink mt-0.5 truncate">未填寫</div>
               <div id="cardScoreB" class="text-xs font-bold text-sage mt-1">0 / 15 ★</div>
             </div>
@@ -387,7 +387,7 @@
         </div>
 
         <!-- Fear & Plan B + Micro Action -->
-        <div class="space-y-2.5 text-xs sm:text-sm mb-4">
+        <div class="space-y-2.5 text-xs sm:text-sm">
           <div class="bg-white p-3 rounded-xl border border-borderWarm">
             <span class="font-bold text-ink">🛡️ 恐懼與補救對策：</span>
             <span id="cardFearPlan" class="text-muted">尚未填寫</span>
@@ -396,13 +396,6 @@
             <span class="font-bold text-sage">🌱 未來 7 天微行動：</span>
             <span id="cardMicroAction" class="text-ink font-medium">尚未填寫</span>
           </div>
-        </div>
-
-        <!-- Peer Feedback Section -->
-        <div class="bg-amberSoft/80 p-3.5 rounded-xl border border-dashed border-accent/50">
-          <label class="block text-xs font-bold text-accent mb-1">💬 《人生顧問診所》夥伴回饋欄（請同組同學幫你寫一句肯定）：</label>
-          <input type="text" id="peerFeedback" placeholder="例如：我覺得你很看重專業精進，選選擇A非常有優勢！"
-            class="w-full bg-white/90 px-3 py-2 rounded-lg border border-borderWarm text-xs sm:text-sm text-ink focus:outline-none focus:border-accent" />
         </div>
       </div>
 
@@ -572,7 +565,6 @@
         selectedIds.delete(id);
       } else {
         if (selectedIds.size >= target) {
-          // Briefly shake counter to indicate max reached
           const counter = document.getElementById('selectionCounter');
           counter.classList.add('scale-105', 'border-accent');
           setTimeout(() => counter.classList.remove('scale-105', 'border-accent'), 200);
@@ -741,146 +733,3 @@
         const customDef = document.getElementById(`defInput_${idx}`)?.value.trim() || val.desc;
         const div = document.createElement('div');
         div.className = 'bg-white p-3 rounded-xl border border-borderWarm';
-        div.innerHTML = `
-          <div class="text-[10px] font-bold text-accent">TOP ${idx + 1}</div>
-          <div class="font-bold text-sm text-ink mb-1">${val.title}</div>
-          <div class="text-[11px] text-muted leading-snug">${customDef}</div>
-        `;
-        top3Container.appendChild(div);
-      });
-
-      // Options & Scores
-      const optA = document.getElementById('optionA').value.trim() || '選擇 A（未命名）';
-      const optB = document.getElementById('optionB').value.trim() || '選擇 B（未命名）';
-      const sumA = ratingsA.reduce((a, b) => a + b, 0);
-      const sumB = ratingsB.reduce((a, b) => a + b, 0);
-
-      document.getElementById('cardOptionA').innerText = optA;
-      document.getElementById('cardScoreA').innerText = `契合度：${sumA} / 15 ★`;
-      document.getElementById('cardOptionB').innerText = optB;
-      document.getElementById('cardScoreB').innerText = `契合度：${sumB} / 15 ★`;
-
-      // Fear & Micro Action
-      const fear = document.getElementById('worstFear').value.trim();
-      const planB = document.getElementById('planB').value.trim();
-      if (fear || planB) {
-        document.getElementById('cardFearPlan').innerText = `最怕「${fear || '無'}」→ 補救對策：${planB || '無'}`;
-      } else {
-        document.getElementById('cardFearPlan').innerText = '已評估風險，保持彈性調整心態';
-      }
-
-      const micro = document.getElementById('microAction').value.trim() || '本週開始主動蒐集相關資訊並與師長討論';
-      document.getElementById('cardMicroAction').innerText = micro;
-
-      // Reset send button state when regenerating card
-      const sendBtn = document.getElementById('sendSheetBtn');
-      sendBtn.disabled = false;
-      sendBtn.innerHTML = '<span>☁️</span> 傳送資料給老師（同步至試算表）';
-      sendBtn.classList.remove('opacity-70');
-
-      goToStep(5);
-    }
-
-    // Send Data to Google Sheets via GAS
-    function sendToGoogleSheet() {
-      const btn = document.getElementById('sendSheetBtn');
-      btn.disabled = true;
-      btn.innerHTML = '<span>⏳</span> 資料傳送中，請稍候...';
-
-      const sumA = ratingsA.reduce((a, b) => a + b, 0);
-      const sumB = ratingsB.reduce((a, b) => a + b, 0);
-      const optA = document.getElementById('optionA').value.trim();
-      const optB = document.getElementById('optionB').value.trim();
-      const fear = document.getElementById('worstFear').value.trim();
-      const planB = document.getElementById('planB').value.trim();
-
-      const def0 = document.getElementById('defInput_0')?.value.trim();
-      const def1 = document.getElementById('defInput_1')?.value.trim();
-      const def2 = document.getElementById('defInput_2')?.value.trim();
-
-      const payload = {
-        classSeat: document.getElementById('inputClassSeat').value.trim() || '未填寫',
-        studentName: document.getElementById('inputName').value.trim() || '匿名探索者',
-        top1: finalTop3[0] ? `${finalTop3[0].title}${def0 ? '（' + def0 + '）' : ''}` : '',
-        top2: finalTop3[1] ? `${finalTop3[1].title}${def1 ? '（' + def1 + '）' : ''}` : '',
-        top3: finalTop3[2] ? `${finalTop3[2].title}${def2 ? '（' + def2 + '）' : ''}` : '',
-        innerRatio: `${document.getElementById('innerSlider').value}%`,
-        optionA: optA ? `${optA} (${sumA}分)` : `未填寫 (${sumA}分)`,
-        optionB: optB ? `${optB} (${sumB}分)` : `未填寫 (${sumB}分)`,
-        fearPlanB: `最怕：${fear || '無'} / PlanB：${planB || '無'}`,
-        microAction: document.getElementById('microAction').value.trim() || '未填寫',
-        peerFeedback: document.getElementById('peerFeedback').value.trim() || '無'
-      };
-
-      fetch(GAS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(() => {
-        btn.innerHTML = '<span>✅</span> 已成功傳送給老師！';
-        btn.classList.add('opacity-85');
-        alert('🎉 傳送成功！老師的試算表已收到你的生涯決策羅盤紀錄。別忘了也可以點擊下方「下載結果圖卡」留存喔！');
-      })
-      .catch(err => {
-        console.error('傳送錯誤:', err);
-        btn.disabled = false;
-        btn.innerHTML = '<span>⚠️</span> 傳送失敗，請再點一次重試';
-        alert('傳送時發生網路異常，請確認網路連線或是否已登入學校 Google 帳號後再試一次。');
-      });
-    }
-
-    function downloadCardImage() {
-      const target = document.getElementById('exportCardArea');
-      const feedbackInput = document.getElementById('peerFeedback');
-      const feedbackVal = feedbackInput.value.trim();
-
-      // Replace input with static text temporarily for clean canvas rendering
-      const tempSpan = document.createElement('div');
-      tempSpan.className = 'text-xs sm:text-sm text-ink font-medium bg-white/90 px-3 py-2 rounded-lg border border-borderWarm';
-      tempSpan.innerText = feedbackVal || '（小組夥伴現場口頭給予肯定與祝福 ✨）';
-      feedbackInput.style.display = 'none';
-      feedbackInput.parentNode.appendChild(tempSpan);
-
-      html2canvas(target, {
-        scale: 2,
-        backgroundColor: '#FAF8F5',
-        useCORS: true
-      }).then(canvas => {
-        // Restore input
-        tempSpan.remove();
-        feedbackInput.style.display = 'block';
-
-        const link = document.createElement('a');
-        const studentName = document.getElementById('inputName').value.trim() || '我的';
-        link.download = `${studentName}_生涯決策羅盤.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      }).catch(err => {
-        tempSpan.remove();
-        feedbackInput.style.display = 'block';
-        alert('圖片生成遇到一點小問題，請直接使用手機或電腦截圖保存即可！');
-      });
-    }
-
-    function resetAll() {
-      if (!confirm('確定要清空目前填寫的內容並重新開始嗎？')) return;
-      auctionRound = 1;
-      selectedIds.clear();
-      finalTop3 = [];
-      ratingsA = [0, 0, 0];
-      ratingsB = [0, 0, 0];
-      document.getElementById('inputClassSeat').value = '';
-      document.getElementById('inputName').value = '';
-      document.getElementById('optionA').value = '';
-      document.getElementById('optionB').value = '';
-      document.getElementById('worstFear').value = '';
-      document.getElementById('planB').value = '';
-      document.getElementById('microAction').value = '';
-      document.getElementById('peerFeedback').value = '';
-      goToStep(1);
-    }
-  </script>
-</body>
-</html>
