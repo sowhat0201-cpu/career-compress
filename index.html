@@ -147,7 +147,7 @@
                 class="w-full px-3.5 py-2.5 rounded-lg bg-white border border-borderWarm text-sm focus:outline-none focus:border-accent" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-muted mb-1">你的姓名</label>
+              <label class="block text-xs font-medium text-muted mb-1">你的姓名或暱稱</label>
               <input type="text" id="inputName" placeholder="請輸入姓名"
                 class="w-full px-3.5 py-2.5 rounded-lg bg-white border border-borderWarm text-sm focus:outline-none focus:border-accent" />
             </div>
@@ -320,16 +320,6 @@
               class="w-full px-3 py-2 rounded-lg bg-white border border-borderWarm text-sm focus:outline-none focus:border-accent" />
           </div>
         </div>
-
-        <!-- 7-Day Micro Action -->
-        <div class="bg-sageLight/60 rounded-xl p-4 sm:p-5 border border-sage/20 space-y-2">
-          <h3 class="font-bold text-sm text-ink flex items-center gap-1.5">
-            <span>🌱</span> 未來 7 天的微行動承諾（MVP）
-          </h3>
-          <p class="text-xs text-muted">你不需要現在看清整條路，只需要看清下一步踩在哪裡。這週你願意做的一件小事是？</p>
-          <input type="text" id="microAction" placeholder="例如：這週五前找學長姐或老師聊 15 分鐘、查一間公司的職缺條件"
-            class="w-full px-3 py-2.5 rounded-lg bg-white border border-borderWarm text-sm focus:outline-none focus:border-sage" />
-        </div>
       </div>
 
       <div class="flex gap-3">
@@ -346,9 +336,8 @@
     <section id="step5" class="step-section">
       <div class="mb-4 text-center">
         <span class="inline-block px-3 py-1 rounded-full bg-sageLight text-sage text-xs font-bold mb-1">
-          🎉 探索完成！請將此畫面傳送給老師並下載圖卡
+          🎉 探索完成！請點擊下方按鈕下載圖卡（系統將自動同步繳交給老師）
         </span>
-        <p class="text-xs text-muted">確認內容無誤後，請點擊下方「傳送資料給老師」與「下載結果圖卡」</p>
       </div>
 
       <!-- EXPORTABLE RESULT CARD AREA -->
@@ -393,29 +382,24 @@
           </div>
         </div>
 
-        <!-- Fear & Plan B + Micro Action -->
-        <div class="space-y-2.5 text-xs sm:text-sm">
+        <!-- Fear & Plan B -->
+        <div class="text-xs sm:text-sm">
           <div class="bg-white p-3 rounded-xl border border-borderWarm">
             <span class="font-bold text-ink">🛡️ 恐懼與補救對策：</span>
             <span id="cardFearPlan" class="text-muted">尚未填寫</span>
           </div>
-          <div class="bg-sageLight/70 p-3 rounded-xl border border-sage/30">
-            <span class="font-bold text-sage">🌱 未來 7 天微行動：</span>
-            <span id="cardMicroAction" class="text-ink font-medium">尚未填寫</span>
-          </div>
         </div>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Unified Action Button -->
       <div class="space-y-3">
-        <!-- Send to Google Sheets Button -->
-        <button id="sendSheetBtn" onclick="sendToGoogleSheet()" class="w-full py-3.5 rounded-xl bg-sage text-white font-bold text-base shadow-md hover:bg-sage/90 active:scale-[0.99] transition flex items-center justify-center gap-2">
-          <span>☁️</span> 傳送資料給老師（同步至試算表）
+        <button id="downloadAndSubmitBtn" onclick="downloadAndSubmit()" class="w-full py-4 rounded-xl bg-ink text-white font-bold text-base shadow-md hover:bg-ink/90 active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <span>📥</span> 一鍵下載結果圖卡（同步交作業給老師）
         </button>
 
-        <button onclick="downloadCardImage()" class="w-full py-3.5 rounded-xl bg-ink text-white font-bold text-base shadow-md hover:bg-ink/90 active:scale-[0.99] transition flex items-center justify-center gap-2">
-          <span>📥</span> 一鍵下載結果圖卡 (PNG)
-        </button>
+        <div id="submitStatusMsg" class="hidden text-center text-xs font-bold text-sage bg-sageLight/80 py-2 px-3 rounded-lg border border-sage/20">
+          ✅ 老師已收到你的生涯決策羅盤紀錄！
+        </div>
 
         <div class="flex gap-3">
           <button onclick="goToStep(4)" class="flex-1 py-2.5 rounded-xl bg-white border border-borderWarm text-muted font-medium text-xs sm:text-sm">
@@ -470,6 +454,7 @@
     let finalTop3 = []; // Array of value objects
     let ratingsA = [0, 0, 0];
     let ratingsB = [0, 0, 0];
+    let hasSubmittedToSheet = false; // Prevent duplicate submissions
 
     // Step Navigation
     function goToStep(step) {
@@ -721,7 +706,7 @@
       renderStarMatrix();
     }
 
-    // ==================== STEP 5: GENERATE FINAL CARD & EXPORT ====================
+    // ==================== STEP 5: GENERATE FINAL CARD & UNIFIED EXPORT ====================
     function generateFinalCard() {
       const className = document.getElementById('inputClass').value;
       const studentId = document.getElementById('inputStudentId').value.trim();
@@ -761,7 +746,7 @@
       document.getElementById('cardOptionB').innerText = optB;
       document.getElementById('cardScoreB').innerText = `契合度：${sumB} / 15 ★`;
 
-      // Fear & Micro Action
+      // Fear & Plan B
       const fear = document.getElementById('worstFear').value.trim();
       const planB = document.getElementById('planB').value.trim();
       if (fear || planB) {
@@ -770,73 +755,67 @@
         document.getElementById('cardFearPlan').innerText = '已評估風險，保持彈性調整心態';
       }
 
-      const micro = document.getElementById('microAction').value.trim() || '本週開始主動蒐集相關資訊並與師長討論';
-      document.getElementById('cardMicroAction').innerText = micro;
-
-      // Reset send button state when regenerating card
-      const sendBtn = document.getElementById('sendSheetBtn');
-      sendBtn.disabled = false;
-      sendBtn.innerHTML = '<span>☁️</span> 傳送資料給老師（同步至試算表）';
-      sendBtn.classList.remove('opacity-70');
+      // Reset submission flag if student went back and modified content
+      hasSubmittedToSheet = false;
+      document.getElementById('submitStatusMsg').classList.add('hidden');
+      const dlBtn = document.getElementById('downloadAndSubmitBtn');
+      dlBtn.disabled = false;
+      dlBtn.innerHTML = '<span>📥</span> 一鍵下載結果圖卡（同步交作業給老師）';
 
       goToStep(5);
     }
 
-    // Send Data to Google Sheets via GAS
-    function sendToGoogleSheet() {
-      const btn = document.getElementById('sendSheetBtn');
+    // Unified Download Image + Auto-Submit to Google Sheets
+    function downloadAndSubmit() {
+      const btn = document.getElementById('downloadAndSubmitBtn');
       btn.disabled = true;
-      btn.innerHTML = '<span>⏳</span> 資料傳送中，請稍候...';
+      btn.innerHTML = '<span>⏳</span> 正在傳送資料並生成圖卡...';
 
-      const sumA = ratingsA.reduce((a, b) => a + b, 0);
-      const sumB = ratingsB.reduce((a, b) => a + b, 0);
-      const optA = document.getElementById('optionA').value.trim();
-      const optB = document.getElementById('optionB').value.trim();
-      const fear = document.getElementById('worstFear').value.trim();
-      const planB = document.getElementById('planB').value.trim();
+      // 1. Send data to Google Sheets if not already submitted for this version
+      if (!hasSubmittedToSheet) {
+        const sumA = ratingsA.reduce((a, b) => a + b, 0);
+        const sumB = ratingsB.reduce((a, b) => a + b, 0);
+        const optA = document.getElementById('optionA').value.trim();
+        const optB = document.getElementById('optionB').value.trim();
+        const fear = document.getElementById('worstFear').value.trim();
+        const planB = document.getElementById('planB').value.trim();
 
-      const def0 = document.getElementById('defInput_0')?.value.trim();
-      const def1 = document.getElementById('defInput_1')?.value.trim();
-      const def2 = document.getElementById('defInput_2')?.value.trim();
+        const def0 = document.getElementById('defInput_0')?.value.trim();
+        const def1 = document.getElementById('defInput_1')?.value.trim();
+        const def2 = document.getElementById('defInput_2')?.value.trim();
 
-      const className = document.getElementById('inputClass').value;
-      const studentId = document.getElementById('inputStudentId').value.trim();
+        const className = document.getElementById('inputClass').value;
+        const studentId = document.getElementById('inputStudentId').value.trim();
 
-      const payload = {
-        classSeat: studentId ? `${className} ${studentId}` : className,
-        studentName: document.getElementById('inputName').value.trim() || '匿名探索者',
-        top1: finalTop3[0] ? `${finalTop3[0].title}${def0 ? '（' + def0 + '）' : ''}` : '',
-        top2: finalTop3[1] ? `${finalTop3[1].title}${def1 ? '（' + def1 + '）' : ''}` : '',
-        top3: finalTop3[2] ? `${finalTop3[2].title}${def2 ? '（' + def2 + '）' : ''}` : '',
-        innerRatio: `${document.getElementById('innerSlider').value}%`,
-        optionA: optA ? `${optA} (${sumA}分)` : `未填寫 (${sumA}分)`,
-        optionB: optB ? `${optB} (${sumB}分)` : `未填寫 (${sumB}分)`,
-        fearPlanB: `最怕：${fear || '無'} / PlanB：${planB || '無'}`,
-        microAction: document.getElementById('microAction').value.trim() || '未填寫'
-      };
+        const payload = {
+          classSeat: studentId ? `${className} ${studentId}` : className,
+          studentName: document.getElementById('inputName').value.trim() || '匿名探索者',
+          top1: finalTop3[0] ? `${finalTop3[0].title}${def0 ? '（' + def0 + '）' : ''}` : '',
+          top2: finalTop3[1] ? `${finalTop3[1].title}${def1 ? '（' + def1 + '）' : ''}` : '',
+          top3: finalTop3[2] ? `${finalTop3[2].title}${def2 ? '（' + def2 + '）' : ''}` : '',
+          innerRatio: `${document.getElementById('innerSlider').value}%`,
+          optionA: optA ? `${optA} (${sumA}分)` : `未填寫 (${sumA}分)`,
+          optionB: optB ? `${optB} (${sumB}分)` : `未填寫 (${sumB}分)`,
+          fearPlanB: `最怕：${fear || '無'} / PlanB：${planB || '無'}`
+        };
 
-      fetch(GAS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(() => {
-        btn.innerHTML = '<span>✅</span> 已成功傳送給老師！';
-        btn.classList.add('opacity-85');
-        alert('🎉 傳送成功！老師的試算表已收到你的生涯決策羅盤紀錄。別忘了也可以點擊下方「下載結果圖卡」留存喔！');
-      })
-      .catch(err => {
-        console.error('傳送錯誤:', err);
-        btn.disabled = false;
-        btn.innerHTML = '<span>⚠️</span> 傳送失敗，請再點一次重試';
-        alert('傳送時發生網路異常，請確認網路連線或是否已登入學校 Google 帳號後再試一次。');
-      });
-    }
+        fetch(GAS_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(() => {
+          hasSubmittedToSheet = true;
+          document.getElementById('submitStatusMsg').classList.remove('hidden');
+        })
+        .catch(err => {
+          console.error('傳送錯誤:', err);
+        });
+      }
 
-    function downloadCardImage() {
+      // 2. Generate and download PNG card
       const target = document.getElementById('exportCardArea');
-
       html2canvas(target, {
         scale: 2,
         backgroundColor: '#FAF8F5',
@@ -847,8 +826,13 @@
         link.download = `${studentName}_生涯決策羅盤.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
+
+        btn.disabled = false;
+        btn.innerHTML = '<span>✅</span> 已傳送給老師並完成下載（可再次下載圖卡）';
       }).catch(err => {
-        alert('圖片生成遇到一點小問題，請直接使用手機或電腦截圖保存即可！');
+        btn.disabled = false;
+        btn.innerHTML = '<span>📥</span> 一鍵下載結果圖卡（同步交作業給老師）';
+        alert('請務必下載圖卡，並將圖卡上傳至返校Line群）');
       });
     }
 
@@ -859,6 +843,7 @@
       finalTop3 = [];
       ratingsA = [0, 0, 0];
       ratingsB = [0, 0, 0];
+      hasSubmittedToSheet = false;
       document.getElementById('inputClass').value = '返校一';
       document.getElementById('inputStudentId').value = '';
       document.getElementById('inputName').value = '';
@@ -866,7 +851,6 @@
       document.getElementById('optionB').value = '';
       document.getElementById('worstFear').value = '';
       document.getElementById('planB').value = '';
-      document.getElementById('microAction').value = '';
       goToStep(1);
     }
   </script>
