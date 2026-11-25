@@ -336,7 +336,7 @@
     <section id="step5" class="step-section">
       <div class="mb-4 text-center">
         <span class="inline-block px-3 py-1 rounded-full bg-sageLight text-sage text-xs font-bold mb-1">
-          🎉 探索完成！請點擊下方按鈕下載圖卡（系統將自動同步繳交給老師）
+          🎉 探索完成！請點擊下方按鈕下載你的專屬生涯決策羅盤圖卡
         </span>
       </div>
 
@@ -393,13 +393,9 @@
 
       <!-- Unified Action Button -->
       <div class="space-y-3">
-        <button id="downloadAndSubmitBtn" onclick="downloadAndSubmit()" class="w-full py-4 rounded-xl bg-ink text-white font-bold text-base shadow-md hover:bg-ink/90 active:scale-[0.99] transition flex items-center justify-center gap-2">
-          <span>📥</span> 一鍵下載結果圖卡（同步交作業給老師）
+        <button id="downloadBtn" onclick="downloadAndSubmit()" class="w-full py-4 rounded-xl bg-ink text-white font-bold text-base shadow-md hover:bg-ink/90 active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <span>📥</span> 一鍵下載結果圖卡 (PNG)
         </button>
-
-        <div id="submitStatusMsg" class="hidden text-center text-xs font-bold text-sage bg-sageLight/80 py-2 px-3 rounded-lg border border-sage/20">
-          ✅ 老師已收到你的生涯決策羅盤紀錄！
-        </div>
 
         <div class="flex gap-3">
           <button onclick="goToStep(4)" class="flex-1 py-2.5 rounded-xl bg-white border border-borderWarm text-muted font-medium text-xs sm:text-sm">
@@ -757,21 +753,20 @@
 
       // Reset submission flag if student went back and modified content
       hasSubmittedToSheet = false;
-      document.getElementById('submitStatusMsg').classList.add('hidden');
-      const dlBtn = document.getElementById('downloadAndSubmitBtn');
+      const dlBtn = document.getElementById('downloadBtn');
       dlBtn.disabled = false;
-      dlBtn.innerHTML = '<span>📥</span> 一鍵下載結果圖卡（同步交作業給老師）';
+      dlBtn.innerHTML = '<span>📥</span> 一鍵下載結果圖卡 (PNG)';
 
       goToStep(5);
     }
 
-    // Unified Download Image + Auto-Submit to Google Sheets
+    // Download Image + Silent Auto-Submit to Google Sheets
     function downloadAndSubmit() {
-      const btn = document.getElementById('downloadAndSubmitBtn');
+      const btn = document.getElementById('downloadBtn');
       btn.disabled = true;
-      btn.innerHTML = '<span>⏳</span> 正在傳送資料並生成圖卡...';
+      btn.innerHTML = '<span>⏳</span> 正在生成圖卡並下載...';
 
-      // 1. Send data to Google Sheets if not already submitted for this version
+      // 1. Silently send data to Google Sheets if not already submitted for this version
       if (!hasSubmittedToSheet) {
         const sumA = ratingsA.reduce((a, b) => a + b, 0);
         const sumB = ratingsB.reduce((a, b) => a + b, 0);
@@ -807,7 +802,6 @@
         })
         .then(() => {
           hasSubmittedToSheet = true;
-          document.getElementById('submitStatusMsg').classList.remove('hidden');
         })
         .catch(err => {
           console.error('傳送錯誤:', err);
@@ -828,11 +822,11 @@
         link.click();
 
         btn.disabled = false;
-        btn.innerHTML = '<span>✅</span> 已傳送給老師並完成下載（可再次下載圖卡）';
+        btn.innerHTML = '<span>✅</span> 下載完成（點擊可再次下載）';
       }).catch(err => {
         btn.disabled = false;
-        btn.innerHTML = '<span>📥</span> 一鍵下載結果圖卡（同步交作業給老師）';
-        alert('請務必下載圖卡，並將圖卡上傳至返校Line群）');
+        btn.innerHTML = '<span>📥</span> 一鍵下載結果圖卡 (PNG)';
+        alert('圖片生成遇到一點小問題，請直接使用手機或電腦截圖保存即可！');
       });
     }
 
@@ -844,7 +838,7 @@
       ratingsA = [0, 0, 0];
       ratingsB = [0, 0, 0];
       hasSubmittedToSheet = false;
-      document.getElementById('inputClass').value = '返校一';
+      document.getElementById('inputClass').value = '';
       document.getElementById('inputStudentId').value = '';
       document.getElementById('inputName').value = '';
       document.getElementById('optionA').value = '';
